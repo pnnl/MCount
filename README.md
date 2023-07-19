@@ -1,1 +1,1 @@
-# Mussel-Counting-AI-App
+### Refer to the instructions below to properly utilize Mussel Count
