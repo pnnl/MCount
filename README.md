@@ -1,1 +1,1 @@
-### Refer to the instructions below to properly utilize Mussel Count
+### Refer to the instructions below to properly utilize Mussel Counter (MCount)
