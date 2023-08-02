@@ -10,7 +10,7 @@ def defaultUI(window):
     window.setWindowTitle("Mussel Counter")
 
     # Sets app icon
-    window.setWindowIcon(qtg.QIcon('icon.jpg'))
+    window.setWindowIcon(qtg.QIcon(r'C:\Users\mill286\OneDrive - PNNL\Desktop\Mussel-Counting-AI-App\\resources\icon.jpg'))
 
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
@@ -33,8 +33,9 @@ class MainWindow(qtw.QWidget):
         defaultUI(self)
 
         # Create title and author labels within vertical layout
-        title_label = qtw.QLabel("M-Count")
+        title_label = qtw.QLabel("MCount")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        title_label.setStyleSheet('color: #D77600; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         self.layout().addWidget(title_label)
@@ -45,7 +46,7 @@ class MainWindow(qtw.QWidget):
         self.layout().addWidget(author_label)
 
         # Creates run, train, and select model buttons within vertical layout
-        run_button = qtw.QPushButton("Run Model")
+        run_button = qtw.QPushButton("Count Mussels")
         run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         run_button.clicked.connect(self.run_button_clicked)
         self.layout().addWidget(run_button)

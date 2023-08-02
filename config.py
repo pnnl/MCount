@@ -2,10 +2,10 @@
 default_font = "Lelawadee"
 
 # Font size for all headers
-header_font_size = "30"
+header_font_size = 30
 
 # Font size for all buttons (also changes overall button size accordingly)
-button_font_size = "14"
+button_font_size = 14
 
 
 
