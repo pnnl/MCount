@@ -1,9 +1,15 @@
-import config as cfg
-
 import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
+
+import json
 import os
+
+import config as cfg
+
+
+
+cwd = os.getcwd()
 
 def defaultUI(window):
     # Adds a title 
@@ -35,7 +41,7 @@ class MainWindow(qtw.QWidget):
         # Create title and author labels within vertical layout
         title_label = qtw.QLabel("MCount")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        title_label.setStyleSheet('color: #D77600; font-weight: bold;')
+        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         self.layout().addWidget(title_label)
@@ -113,14 +119,15 @@ class RunWindow(qtw.QWidget):
         # Adds the default UI elements
         defaultUI(self)
 
-        # Creates a label within layout
+        # Creates a title label within layout
         title_label = qtw.QLabel("Run Model")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(title_label)
 
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Select images from file explorer")
+        file_button = qtw.QPushButton("Select input images from file explorer")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
@@ -161,6 +168,7 @@ class TrainWindow (qtw.QWidget):
         # Create title and author labels within layout
         title_label = qtw.QLabel("Train Model")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(title_label)
 
@@ -209,11 +217,24 @@ class SelectWindow (qtw.QWidget):
         # Creates a label within layout
         title_label = qtw.QLabel("Select Model")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(title_label)
 
+        # Checks json for current model directory and corresponding name
+        with open(fr"{cwd}\resources\modeldict.json", "r") as f:
+            model_dict = json.load(f)
+        directory = model_dict["current_model_directory"]
+        model_name = model_dict[directory]
+        
+        # Adds a current model label 
+        self.model_label = qtw.QLabel(f"Current Model: {model_name}")
+        self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.model_label)
+
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Select model folder from file explorer")
+        file_button = qtw.QPushButton("Add a new model folder from file explorer")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
@@ -225,15 +246,37 @@ class SelectWindow (qtw.QWidget):
         self.layout().addWidget(back_button)
 
     def file_button_clicked(self):
-        # Opens file explorer to choose images
-        folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Folder')
-        
-        #Checks if images were chosen
-        if folderpath == "":
+        # Opens file explorer to choose a directory
+        self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        with open(fr"{cwd}\resources\modeldict.json", "r") as f:
+            model_dict = json.load(f)
+        # Checks if a folder was chosen
+        if self.folderpath == "":
             pass
-        else: 
-            print(folderpath)
-            os.startfile(folderpath)
+        elif self.folderpath in model_dict:
+            # Records the new model directory in json
+            with open(f"{cwd}/resources/modeldict.json", "r") as f:
+                model_dict = json.load(f)
+            model_dict["current_model_directory"] = self.folderpath
+            with open(f"{cwd}/resources/modeldict.json", "w") as f:
+                json.dump(model_dict, f, indent=4)
+            self.model_label.setText(f"Current Model: {model_dict[self.folderpath]}")
+        else:
+            print(self.folderpath)
+            print(model_dict)
+            self.name_model()
+    
+    def name_model(self):
+        name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name your model:')
+        if done and name != "":
+            # Records the new model directory and its corresponding name in json
+            with open(f"{cwd}/resources/modeldict.json", "r") as f:
+                model_dict = json.load(f)
+            model_dict["current_model_directory"] = self.folderpath
+            model_dict[self.folderpath] = name
+            with open(f"{cwd}/resources/modeldict.json", "w") as f:
+                json.dump(model_dict, f, indent=4)
+            self.model_label.setText(f"Current Model: {name}")
 
     def back_button_clicked (self):
         self.mw = MainWindow()
