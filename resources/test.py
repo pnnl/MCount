@@ -3,15 +3,12 @@ import sys
 import json
 import os
 
-import json
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QFontDatabase
 
-# Load the JSON data from the file
-with open(r'C:\Users\mill286\OneDrive - PNNL\Desktop\Mussel-Counting-AI-App\resources\data.json', 'r') as file:
-    data = json.load(file)
+app = QApplication([])
 
-# Check if the key "name" exists in the JSON data
-if 'name' in data:
-    print("The key 'name' exists in the JSON data.")
-    print("Value of 'name':", data['name'])
-else:
-    print("The key 'name' does not exist in the JSON data.")
+# Get a list of font families available on the system
+available_fonts = "\n".join(QFontDatabase().families())
+
+print(available_fonts)

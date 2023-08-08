@@ -2,18 +2,17 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
 
+import sys
 import json
 import os
 
 import config as cfg
 
-
-
 cwd = os.getcwd()
 
 def defaultUI(window):
     # Adds a title 
-    window.setWindowTitle("Mussel Counter")
+    window.setWindowTitle("MCount")
 
     # Sets app icon
     window.setWindowIcon(qtg.QIcon(r'C:\Users\mill286\OneDrive - PNNL\Desktop\Mussel-Counting-AI-App\\resources\icon.jpg'))
@@ -21,6 +20,8 @@ def defaultUI(window):
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
     window.layout().setSpacing(10)
+    window.layout().setSizeConstraint(qtw.QLayout.SetMaximumSize)
+
     # window.layout().setSizeConstraint(qtw.QLayout.SetMinimumSize)
     
     # Creates window at specific size
@@ -52,10 +53,10 @@ class MainWindow(qtw.QWidget):
         self.layout().addWidget(author_label)
 
         # Creates run, train, and select model buttons within vertical layout
-        run_button = qtw.QPushButton("Count Mussels")
-        run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        run_button.clicked.connect(self.run_button_clicked)
-        self.layout().addWidget(run_button)
+        count_button = qtw.QPushButton("Count")
+        count_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        count_button.clicked.connect(self.count_button_clicked)
+        self.layout().addWidget(count_button)
         train_button = qtw.QPushButton("Train Model")
         train_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         train_button.clicked.connect(self.train_button_clicked)
@@ -65,7 +66,6 @@ class MainWindow(qtw.QWidget):
         select_button.clicked.connect(self.select_button_clicked)
         self.layout().addWidget(select_button)
        
-
         # Creates help/quit button split at bottom
         menu_split = qtw.QHBoxLayout()
         menu_split.setSpacing(10)
@@ -84,10 +84,10 @@ class MainWindow(qtw.QWidget):
         # Shows window
         self.show()
 
-    def run_button_clicked(self):
-        self.rw = RunWindow()
-        self.rw.move(self.pos())
-        self.rw.show()
+    def count_button_clicked(self):
+        self.cw = CountWindow()
+        self.cw.move(self.pos())
+        self.cw.show()
         self.close()
 
     def train_button_clicked(self):
@@ -110,7 +110,7 @@ class MainWindow(qtw.QWidget):
         self.close()
 
 
-class RunWindow(qtw.QWidget):
+class CountWindow(qtw.QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -120,23 +120,23 @@ class RunWindow(qtw.QWidget):
         defaultUI(self)
 
         # Creates a title label within layout
-        title_label = qtw.QLabel("Run Model")
+        title_label = qtw.QLabel("Count")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(title_label)
 
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Select input images from file explorer")
-        file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        file_button.clicked.connect(self.file_button_clicked)
-        self.layout().addWidget(file_button)
-    
+        self.file_button = qtw.QPushButton("Select input images from file explorer")
+        self.file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.file_button.clicked.connect(self.file_button_clicked)
+        self.layout().addWidget(self.file_button)    
+        
         # Creates a back button
-        back_button = qtw.QPushButton("Cancel")
-        back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        back_button.clicked.connect(self.back_button_clicked)
-        self.layout().addWidget(back_button)
+        self.back_button = qtw.QPushButton("Cancel")
+        self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.back_button.clicked.connect(self.back_button_clicked)
+        self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
         # Opens file explorer to choose images
@@ -145,7 +145,29 @@ class RunWindow(qtw.QWidget):
         #Checks if images were chosen
         if file_names == ([], ''):
             pass
-        else: 
+        else:
+            # Removes file button and back button
+            self.file_button.setParent(None)
+            self.back_button.setParent(None)
+
+            # Creates checkboxes for thresholding and spreadsheet
+            self.thresh_button = qtw.QCheckBox("Run Mussel Thresholding")
+            self.thresh_button.setChecked(True)
+            self.layout().addWidget(self.thresh_button)
+            self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
+            self.sheet_button.setChecked(True)
+            self.layout().addWidget(self.sheet_button)
+
+            # Creates a run button
+            self.run_button = qtw.QPushButton("Run Model")
+            self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.run_button.clicked.connect(self.cont_button_clicked)
+            self.layout().addWidget(self.run_button)
+
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
+
+            # Opens files 
             for i in range(len(file_names)):
                 os.startfile(file_names[i])
 
@@ -154,6 +176,13 @@ class RunWindow(qtw.QWidget):
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
+
+    def cont_button_clicked(self):
+        # Removes widgets from the layout
+        self.thresh_button.setParent(None)
+        self.sheet_button.setParent(None)
+        self.back_button.setParent(None)
+        self.layout().addWidget(self.back_button)
 
 
 class TrainWindow (qtw.QWidget):
@@ -234,13 +263,13 @@ class SelectWindow (qtw.QWidget):
         self.layout().addWidget(self.model_label)
 
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Add a new model folder from file explorer")
+        file_button = qtw.QPushButton("Add model folder from file explorer")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
     
         # Creates a back button
-        back_button = qtw.QPushButton("Cancel")
+        back_button = qtw.QPushButton("Back to main menu")
         back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         back_button.clicked.connect(self.back_button_clicked)
         self.layout().addWidget(back_button)
@@ -286,7 +315,7 @@ class SelectWindow (qtw.QWidget):
 
 
 # Constructs app
-app = qtw.QApplication([])
+app = qtw.QApplication(sys.argv)
 
 # Constructs window
 mw = MainWindow()
