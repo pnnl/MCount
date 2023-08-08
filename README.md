@@ -11,7 +11,7 @@ You can minimize MCount anytime by clicking the - near the top right corner.
 The window cannot be enlarged to keep the formatting intact - MCount is meant to be a compact GUI app.
 You can close the app anytime by clicking the X in the top right corner.
 You can customize certain GUI elements (such as font or color) in the config.py file found in the same directory as MCount. 
-In the main menu, you have 5 options: Count, Train Model, Select Model, Help, and Quit. 
+The main menu displays MCount's five features as buttons: Count, Train Model, Select Model, Help, and Quit. 
 
 ### Count
 After clicking the Count button, the main menu will disappear and the Count window will open. 
