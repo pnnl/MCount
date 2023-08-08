@@ -1,9 +1,9 @@
 # MCount
-### By Lance Miller and Navaj Nune
+#### By Lance Miller and Navaj Nune
 MCount is a GUI App built with PyQt5 that streamlines object detection. You can utilize a built-in computer vision model and thresholding system to accurately gather mussel larvae settlement data. Or, you can just add your own model, train it, and detect anything! 
 
 ## Installation
-
+TODO
 
 
 ## How to Use MCount
@@ -28,14 +28,28 @@ Once the window says "Count Complete!", you may exit out of MCount.
 
 To view your detected images, open them from the ~\MCount\detections directory. 
 
-*If you're running a mussel larvae detection, these images will already need to be split into tiles. Also, the image CANNOT come from the PNNL shared drive. They must be stored locally. 
+*If you're running a mussel larvae detection, these images will already need to be split into tiles. Also, the images CANNOT come from the PNNL shared drive. They must be stored locally. 
 
 **If you're running a mussel larvae detection, keep both boxes checked.
 
 ### Train Model
+TODO
+
 
 ### Select Model
+After clicking the Select Model button, the main menu will disappear and the Select Model window will open. 
 
+The current model will be displayed at the center of the screen. If you haven't changed the model yet, it should be "MCount Default model". The MCount default model is built to only detect solo mussel larvae. 
+
+If you'd like to change the model, click "Select model folder from file explorer". If you'd like to return to the main menu, click "Back to Main Menu". 
+
+After clicking "Select model folder from file explorer", a file dialog will open. Select the folder in which your model checkpoints and pipeline config file reside. If the folder contains multiple checkpoints, the newest one will always be selected. 
+
+After selecting the model folder, a text input dialog will pop up. Type the name of your model in the field and click OK. This name simply exists for future reference, so make it recognizable. 
+
+After entering the name of the model, the current model will change to the one you just selected. Now this model will be used whenever you train or run detections in MCount. 
+
+*
 
 
 
