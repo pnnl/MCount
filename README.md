@@ -15,14 +15,21 @@ The main menu displays MCount's five features as buttons: Count, Train Model, Se
 
 ### Count
 After clicking the Count button, the main menu will disappear and the Count window will open. 
+
 You may click "Select input images from file explorer". If you'd like to return to the main menu, click "Cancel". 
+
 After clicking "Select input images from file explorer", a file dialog will pop up. Select the images you would like to run detections on.* The file dialog will only accept .jpg, .png, and .tif image types. 
+
 After selecting your images, you will be prompted with two checkboxes. You may check or uncheck them depending on your use case.** "Run Mussel Thresholding" is for counting mussel clumps (along with the solo mussels). "Create Excel Spreadsheet" will create an excel spreadsheet containing the counts for each input image. The spreadsheet is stored in the ~\MCount\spreadsheets directory.
+
 Click "Run Model" to begin the detection. This may take a while.
+
 Once the window says "Count Complete!", you may exit out of MCount. 
+
 To view your detected images, open them from the ~\MCount\detections directory. 
 
 *If you're running a mussel larvae detection, these images will already need to be split into tiles. Also, the image CANNOT come from the PNNL shared drive. They must be stored locally. 
+
 **If you're running a mussel larvae detection, keep both boxes checked.
 
 ### Train Model
