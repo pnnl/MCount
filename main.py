@@ -20,7 +20,6 @@ def defaultUI(window):
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
     window.layout().setSpacing(10)
-    window.layout().setSizeConstraint(qtw.QLayout.SetMaximumSize)
 
     # window.layout().setSizeConstraint(qtw.QLayout.SetMinimumSize)
     

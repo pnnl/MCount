@@ -1,8 +1,8 @@
 # Font used for all text in the program (a list of available fonts can be found in ~\MCount\resources\fonts)
-default_font = "Lelawadee"
+default_font = "Leelawadee"
 
 # Font color used for all headers
-header_color = '#D77600'
+header_color = "#D77600"
 
 # Font size for all headers
 header_font_size = 30
