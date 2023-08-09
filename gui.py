@@ -2,9 +2,11 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
 
-import sys
+import threading
 import json
+import sys
 import os
+import subprocess
 
 import config as cfg
 
@@ -142,9 +144,10 @@ class CountWindow(qtw.QWidget):
         file_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Images", "", "Image Files (*.png *.jpg *.tif)")
         
         #Checks if images were chosen
-        if file_names == ([], ''):
+        if file_names == []:
             pass
         else:
+            print(file_names)
             # Removes file button and back button
             self.file_button.setParent(None)
             self.back_button.setParent(None)
@@ -190,7 +193,7 @@ class TrainWindow (qtw.QWidget):
         self.initUI()
     
     def initUI(self):
-        
+        # Adds the default UI elements
         defaultUI(self)
 
         # Create title and author labels within layout
@@ -217,16 +220,18 @@ class TrainWindow (qtw.QWidget):
     
     def file_button_clicked(self):
         # Opens file explorer to choose images
-        file_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Image Config Files", "", "XML Files (*.xml)")
-        
+        command = 'dir'
+        subprocess.Popen(["start", "cmd", "/k", command], shell=True)
+        # self.xml_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Image Config Files", "", "XML Files (*.xml)")
+         
         # Checks if images were chosen
-        if file_names == ([], ''):
-            pass
-        else: 
-            for i in range(len(file_names)):
-                os.startfile(file_names[i])
+        #if self.xml_names != []:
+            #self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", "", "Protocol Buffer Text File (*.pbtxt)")
+            #if self.labelmap:
+                #subprocess.run(["python","generate_tfrecord.py", "-x", self.xml_names, ], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+                
     
-    def back_button_clicked (self):
+    def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
         self.mw.show()
