@@ -16,8 +16,9 @@ def defaultUI(window):
     # Adds a title 
     window.setWindowTitle("MCount")
 
+    cwd = os.getcwd()    
     # Sets app icon
-    window.setWindowIcon(qtg.QIcon(r'C:\Users\mill286\OneDrive - PNNL\Desktop\Mussel-Counting-AI-App\\resources\icon.jpg'))
+    window.setWindowIcon(qtg.QIcon(cwd + '/resources/icon.jpg'))
 
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
