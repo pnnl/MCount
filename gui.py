@@ -273,16 +273,31 @@ class SelectWindow (qtw.QWidget):
         self.layout().addWidget(title_label)
 
         # Checks json for current model directory and corresponding name
-        with open(fr"{cwd}\resources\modeldict.json", "r") as f:
+        with open(fr"{cwd}\internal\resources\modeldict.json", "r") as f:
             model_dict = json.load(f)
         directory = model_dict["current_model_directory"]
         model_name = model_dict[directory]
+
+        # Creates a horizontal layout for the label and dropdown menu to reside in
+        self.dropdown_layout = qtw.QHBoxLayout()
+        self.layout().addChildLayout(self.dropdown_layout)
         
         # Adds a current model label 
-        self.model_label = qtw.QLabel(f"Current Model: {model_name}")
+        self.model_label = qtw.QLabel(f"Current Model:")
         self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.model_label.setAlignment(qtc.Qt.AlignCenter)
-        self.layout().addWidget(self.model_label)
+        self.layout().addChildWidget(self.model_label)
+        
+        # Creates a dropdown menu of available models
+        self.model_dropdown = qtw.QComboBox()
+        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+            values = list(model_dict.values())
+            print(values)
+        for item in values:
+            self.model_dropdown.addItem(values[item])
+        self.dropdown_layout.addWidget(self.model_dropdown)
+
 
         # Creates a file dialog button
         file_button = qtw.QPushButton("Add model folder from file explorer")
@@ -299,17 +314,17 @@ class SelectWindow (qtw.QWidget):
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
         self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
-        with open(fr"{cwd}\resources\modeldict.json", "r") as f:
+        with open(fr"{cwd}\internal/resources\modeldict.json", "r") as f:
             model_dict = json.load(f)
         # Checks if a folder was chosen
         if self.folderpath == "":
             pass
         elif self.folderpath in model_dict:
             # Records the new model directory in json
-            with open(f"{cwd}/resources/modeldict.json", "r") as f:
+            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
             model_dict["current_model_directory"] = self.folderpath
-            with open(f"{cwd}/resources/modeldict.json", "w") as f:
+            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
                 json.dump(model_dict, f, indent=4)
             self.model_label.setText(f"Current Model: {model_dict[self.folderpath]}")
         else:
@@ -321,11 +336,11 @@ class SelectWindow (qtw.QWidget):
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name your model:')
         if done and name != "":
             # Records the new model directory and its corresponding name in json
-            with open(f"{cwd}/resources/modeldict.json", "r") as f:
+            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
             model_dict["current_model_directory"] = self.folderpath
             model_dict[self.folderpath] = name
-            with open(f"{cwd}/resources/modeldict.json", "w") as f:
+            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
                 json.dump(model_dict, f, indent=4)
             self.model_label.setText(f"Current Model: {name}")
 
