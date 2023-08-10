@@ -22,10 +22,9 @@ import pandas as pd
 import io
 import xml.etree.ElementTree as ET
 import argparse
-import gui
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'    # Suppress TensorFlow logging (1)
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from PIL import Image
 from object_detection.utils import dataset_util, label_map_util
 from collections import namedtuple
@@ -34,8 +33,8 @@ from collections import namedtuple
 parser = argparse.ArgumentParser(
     description="Sample TensorFlow XML-to-TFRecord converter")
 parser.add_argument("-x",
-                    "--xml_paths",
-                    help="Paths to the input .xml files.",
+                    "--xml_dir",
+                    help="Path to the folder where the input .xml files are stored.",
                     type=str)
 parser.add_argument("-l",
                     "--labels_path",
@@ -43,6 +42,11 @@ parser.add_argument("-l",
 parser.add_argument("-o",
                     "--output_path",
                     help="Path of output TFRecord (.record) file.", type=str)
+parser.add_argument("-i",
+                    "--image_dir",
+                    help="Path to the folder where the input image files are stored. "
+                         "Defaults to the same directory as XML_DIR.",
+                    type=str, default=None)
 parser.add_argument("-c",
                     "--csv_path",
                     help="Path of output .csv file. If none provided, then no file will be "
@@ -50,6 +54,9 @@ parser.add_argument("-c",
                     type=str, default=None)
 
 args = parser.parse_args()
+
+if args.image_dir is None:
+    args.image_dir = args.xml_dir
 
 label_map = label_map_util.load_labelmap(args.labels_path)
 label_map_dict = label_map_util.get_label_map_dict(label_map)
@@ -70,7 +77,7 @@ def xml_to_csv(path):
     """
 
     xml_list = []
-    for xml_file in args.xml_paths:
+    for xml_file in glob.glob(path + '/*.xml'):
         tree = ET.parse(xml_file)
         root = tree.getroot()
         filename = root.find('filename').text
@@ -145,7 +152,7 @@ def create_tf_example(group, path):
     return tf_example
 
 
-def gui(_):
+def main(_):
 
     writer = tf.python_io.TFRecordWriter(args.output_path)
     path = os.path.join(args.image_dir)

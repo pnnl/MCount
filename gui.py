@@ -16,9 +16,8 @@ def defaultUI(window):
     # Adds a title 
     window.setWindowTitle("MCount")
 
-    cwd = os.getcwd()    
     # Sets app icon
-    window.setWindowIcon(qtg.QIcon(cwd + '/resources/icon.jpg'))
+    window.setWindowIcon(qtg.QIcon(cwd + '/internal/resources/icon.jpg'))
 
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
@@ -142,7 +141,7 @@ class CountWindow(qtw.QWidget):
 
     def file_button_clicked(self):
         # Opens file explorer to choose images
-        file_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Images", "", "Image Files (*.png *.jpg *.tif)")
+        file_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Images", cfg.initial_directory, "Image Files (*.png *.jpg *.tif)")
         
         #Checks if images were chosen
         if file_names == []:
@@ -205,33 +204,51 @@ class TrainWindow (qtw.QWidget):
         self.layout().addWidget(title_label)
 
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Select image configs from file explorer")
-        file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        file_button.clicked.connect(self.file_button_clicked)
-        self.layout().addWidget(file_button)
+        self.xml_button = qtw.QPushButton("Select image configs from file explorer")
+        self.xml_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.xml_button.clicked.connect(self.xml_button_clicked)
+        self.layout().addWidget(self.xml_button)
 
         # Creates a back button
-        back_button = qtw.QPushButton("Cancel")
-        back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        back_button.clicked.connect(self.back_button_clicked)
-        self.layout().addWidget(back_button)
+        self.back_button = qtw.QPushButton("Cancel")
+        self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.back_button.clicked.connect(self.back_button_clicked)
+        self.layout().addWidget(self.back_button)
 
         # Shows window
         self.show()
     
-    def file_button_clicked(self):
+    def xml_button_clicked(self):
         # Opens file explorer to choose images
-        command = 'dir'
-        subprocess.Popen(["start", "cmd", "/k", command], shell=True)
-        # self.xml_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Image Config Files", "", "XML Files (*.xml)")
-         
+        self.xml_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Image Config Folder", cfg.initial_directory)
+        
         # Checks if images were chosen
-        #if self.xml_names != []:
-            #self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", "", "Protocol Buffer Text File (*.pbtxt)")
-            #if self.labelmap:
-                #subprocess.run(["python","generate_tfrecord.py", "-x", self.xml_names, ], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
-                
+        if self.xml_dir:
+            self.xml_button.setParent(None)
+            self.back_button.setParent(None)
+            self.labelmap_button = qtw.QPushButton("Select labelmap from file explorer")
+            self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
+            self.layout().addWidget(self.labelmap_button)
+            self.layout().addWidget(self.back_button)
     
+    def labelmap_button_clicked(self):
+        self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
+        if self.labelmap:
+            self.labelmap_button.setParent(None)
+            self.back_button.setParent(None)
+            self.train_button = qtw.QPushButton("Begin Model Training")
+            self.train_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.train_button.clicked.connect(self.train_button_clicked)
+            self.layout().addWidget(self.train_button)
+            self.layout().addWidget(self.back_button)
+            
+    def train_button_clicked(self):
+        self.close()
+        tfrecord_dir = cwd + "/external/training"
+        script_name = "internal/scripts/generate_tfrecord.py"
+        subprocess.Popen(["start", "cmd", "/k", "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", tfrecord_dir, "-i", self.xml_dir, "-c", tfrecord_dir], shell=True)
+     
     def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
@@ -281,7 +298,7 @@ class SelectWindow (qtw.QWidget):
 
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
-        self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Folder')
+        self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
         with open(fr"{cwd}\resources\modeldict.json", "r") as f:
             model_dict = json.load(f)
         # Checks if a folder was chosen
