@@ -47,7 +47,7 @@ fileNameAry = []
 musselCountAry = []
 blackPxlAry = []
 
-numPixPerMussle = 143.8
+numPixPerMussle = 150
 
 # iterate over files in
 # that directory
