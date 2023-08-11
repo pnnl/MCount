@@ -9,7 +9,6 @@ import os
 import subprocess
 
 import config as cfg
-import thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
@@ -294,6 +293,9 @@ class SelectWindow (qtw.QWidget):
         self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         self.model_dropdown.setSizePolicy(size_policy)
+        self.dropdown_layout.addWidget(self.model_dropdown)
+
+        # Pulls models from modeldict.json and adds them to the dropdown
         with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
             model_dict = json.load(f)
             values = list(model_dict.values())
@@ -303,8 +305,7 @@ class SelectWindow (qtw.QWidget):
         for item in values[1:]:
             if item != model_name:
                 self.model_dropdown.addItem(item)
-        self.dropdown_layout.addWidget(self.model_dropdown)
-
+        
         # Creates a file dialog button
         file_button = qtw.QPushButton("Add model folder from file explorer")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -335,6 +336,7 @@ class SelectWindow (qtw.QWidget):
         self.menu_split.addWidget(back_button)
 
     def model_dropdown_changed(self,index):
+        # Records the new selected model anytime the dropdown menu is changed
         self.selected_model = self.model_dropdown.itemText(index)
         return self.selected_model
     
@@ -358,19 +360,19 @@ class SelectWindow (qtw.QWidget):
             self.model_dropdown.addItem(name)
 
     def save_button_clicked(self):
-        # Records the new model directory and its corresponding name in modeldict.json
-            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
-                model_dict = json.load(f)
-            selected_model_dir = list(model_dict.keys())[list(model_dict.values()).index(self.selected_model)]
-            model_dict["current_model_directory"] = selected_model_dir
-            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
-                json.dump(model_dict, f, indent=4)
-            for i in range(self.model_dropdown.count()):
-                self.model_dropdown.removeItem(i)
-            self.mw = MainWindow()
-            self.mw.move(self.pos())
-            self.mw.show()
-            self.close()
+        # Changes the current model in modeldict.json to the selected one in the dropdown
+        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+        selected_model_dir = list(model_dict.keys())[list(model_dict.values()).index(self.selected_model)]
+        model_dict["current_model_directory"] = selected_model_dir
+        with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
+            json.dump(model_dict, f, indent=4)
+        for i in range(self.model_dropdown.count()):
+            self.model_dropdown.removeItem(i)
+        self.mw = MainWindow()
+        self.mw.move(self.pos())
+        self.mw.show()
+        self.close()
 
     def back_button_clicked(self):
         self.mw = MainWindow()

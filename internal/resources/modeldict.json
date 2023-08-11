@@ -1,6 +1,7 @@
 {
-    "current_model_directory": "C:/Users/mill286/Tensorflow",
+    "current_model_directory": "C:/PNNL",
     "C:/Users/mill286/Desktop/Mussel-Counting-AI-App/internal/model": "MCount Mussel Detector",
     "C:/Users/mill286/Tensorflow/workspace/models/my_ssd_mobnet_v2_nonexport_05-04-2023": "MobileNet 320x320",
-    "C:/Users/mill286/Tensorflow": "TF"
+    "C:/Users/mill286/Tensorflow": "TF",
+    "C:/PNNL": "PNNL"
 }
