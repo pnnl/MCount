@@ -9,6 +9,7 @@ import os
 import subprocess
 
 import config as cfg
+import thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
