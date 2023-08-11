@@ -39,12 +39,12 @@ class MainWindow(qtw.QWidget):
         defaultUI(self)
 
         # Create title and author labels within vertical layout
-        title_label = qtw.QLabel("MCount")
-        title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        title_label.setAlignment(qtc.Qt.AlignCenter)
-        title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        self.layout().addWidget(title_label)
+        self.title_label = qtw.QLabel("MCount")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.layout().addWidget(self.title_label)
         author_label = qtw.QLabel("By Lance Miller and Navaj Nune")
         author_label.setFont(qtg.QFont(cfg.default_font, 9))
         author_label.setAlignment(qtc.Qt.AlignCenter)
@@ -119,14 +119,14 @@ class CountWindow(qtw.QWidget):
         defaultUI(self)
 
         # Creates a title label within layout
-        title_label = qtw.QLabel("Count")
-        title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        title_label.setAlignment(qtc.Qt.AlignCenter)
-        self.layout().addWidget(title_label)
+        self.title_label = qtw.QLabel("Count")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
-        self.file_button = qtw.QPushButton("Select input images from file explorer")
+        self.file_button = qtw.QPushButton("Select images folder from file explorer")
         self.file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(self.file_button)    
@@ -139,13 +139,10 @@ class CountWindow(qtw.QWidget):
 
     def file_button_clicked(self):
         # Opens file explorer to choose images
-        file_names, _ = qtw.QFileDialog.getOpenFileNames(self, "Open Images", cfg.initial_directory, "Image Files (*.png *.jpg *.tif)")
+        image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
         
         #Checks if images were chosen
-        if file_names == []:
-            pass
-        else:
-            print(file_names)
+        if image_dir != "":
             # Removes file button and back button
             self.file_button.setParent(None)
             self.back_button.setParent(None)
@@ -167,10 +164,6 @@ class CountWindow(qtw.QWidget):
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
-            # Opens files 
-            for i in range(len(file_names)):
-                os.startfile(file_names[i])
-
     def back_button_clicked (self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
@@ -182,6 +175,9 @@ class CountWindow(qtw.QWidget):
         self.thresh_button.setParent(None)
         self.sheet_button.setParent(None)
         self.back_button.setParent(None)
+        self.run_button.setParent(None)
+        # Changes title text
+        self.title_label.setText("Count in Progress...")
         self.layout().addWidget(self.back_button)
 
 
@@ -195,11 +191,11 @@ class TrainWindow (qtw.QWidget):
         defaultUI(self)
 
         # Create title and author labels within layout
-        title_label = qtw.QLabel("Train Model")
-        title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        title_label.setAlignment(qtc.Qt.AlignCenter)
-        self.layout().addWidget(title_label)
+        self.title_label = qtw.QLabel("Train Model")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
         self.xml_button = qtw.QPushButton("Select image configs from file explorer")
@@ -242,11 +238,13 @@ class TrainWindow (qtw.QWidget):
             self.layout().addWidget(self.back_button)
             
     def train_button_clicked(self):
-        self.close()
-        tfrecord_dir = cwd + "/external/training"
-        script_name = "internal/scripts/generate_tfrecord.py"
-        subprocess.Popen(["start", "cmd", "/k", "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", tfrecord_dir, "-i", self.xml_dir, "-c", tfrecord_dir], shell=True)
-     
+        name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this training:')
+        if name and done:
+            self.close()
+            tfrecord_dir = cwd + "/external/training/"
+            script_name = "internal/scripts/generate_tfrecord.py"
+            subprocess.Popen(["start", "cmd", "/k", "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", tfrecord_dir + f"{name}.record", "-i", self.xml_dir, "-c", tfrecord_dir + f"{name}.csv"], shell=True)
+        
     def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
@@ -264,13 +262,13 @@ class SelectWindow (qtw.QWidget):
         defaultUI(self)
 
         # Creates a label within layout
-        title_label = qtw.QLabel("Select Model")
-        title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label = qtw.QLabel("Select Model")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding)
-        title_label.setSizePolicy(size_policy)
-        title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        title_label.setAlignment(qtc.Qt.AlignCenter)
-        self.layout().addWidget(title_label)
+        self.title_label.setSizePolicy(size_policy)
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
 
         # Creates a horizontal layout for the label and dropdown menu to reside in
         self.dropdown_layout = qtw.QHBoxLayout()
