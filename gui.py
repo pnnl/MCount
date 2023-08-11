@@ -21,9 +21,7 @@ def defaultUI(window):
 
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
-    window.layout().setSpacing(10)
-
-    # window.layout().setSizeConstraint(qtw.QLayout.SetMinimumSize)
+    window.layout().setSpacing(15)
     
     # Creates window at specific size
     window.setMinimumSize(500, 325)
@@ -47,7 +45,7 @@ class MainWindow(qtw.QWidget):
         title_label.setAlignment(qtc.Qt.AlignCenter)
         title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         self.layout().addWidget(title_label)
-        author_label = qtw.QLabel("By Navaj Nune and Lance Miller")
+        author_label = qtw.QLabel("By Lance Miller and Navaj Nune")
         author_label.setFont(qtg.QFont(cfg.default_font, 9))
         author_label.setAlignment(qtc.Qt.AlignCenter)
         author_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
@@ -268,83 +266,112 @@ class SelectWindow (qtw.QWidget):
         # Creates a label within layout
         title_label = qtw.QLabel("Select Model")
         title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding)
+        title_label.setSizePolicy(size_policy)
         title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(title_label)
 
-        # Checks json for current model directory and corresponding name
-        with open(fr"{cwd}\internal\resources\modeldict.json", "r") as f:
-            model_dict = json.load(f)
-        directory = model_dict["current_model_directory"]
-        model_name = model_dict[directory]
-
         # Creates a horizontal layout for the label and dropdown menu to reside in
         self.dropdown_layout = qtw.QHBoxLayout()
-        self.layout().addChildLayout(self.dropdown_layout)
+        self.dropdown_layout.setSpacing(10)
+        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.layout().addLayout(self.dropdown_layout)
+        self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a current model label 
         self.model_label = qtw.QLabel(f"Current Model:")
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.model_label.setSizePolicy(size_policy)
         self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.model_label.setAlignment(qtc.Qt.AlignCenter)
-        self.layout().addChildWidget(self.model_label)
+        self.dropdown_layout.addWidget(self.model_label)
         
         # Creates a dropdown menu of available models
         self.model_dropdown = qtw.QComboBox()
+        self.model_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.model_dropdown.setSizePolicy(size_policy)
         with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
             model_dict = json.load(f)
             values = list(model_dict.values())
-            print(values)
-        for item in values:
-            self.model_dropdown.addItem(values[item])
+        directory = model_dict["current_model_directory"]
+        model_name = model_dict[directory]
+        self.model_dropdown.addItem(model_name)
+        for item in values[1:]:
+            if item != model_name:
+                self.model_dropdown.addItem(item)
         self.dropdown_layout.addWidget(self.model_dropdown)
-
 
         # Creates a file dialog button
         file_button = qtw.QPushButton("Add model folder from file explorer")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        file_button.setSizePolicy(size_policy)
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
-    
-        # Creates a back button
-        back_button = qtw.QPushButton("Back to main menu")
-        back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        back_button.clicked.connect(self.back_button_clicked)
-        self.layout().addWidget(back_button)
+        
+        # Creates help/quit button split at bottom of window
+        self.menu_split = qtw.QHBoxLayout()
+        self.menu_split.setSpacing(10)
+        self.layout().addLayout(self.menu_split)
 
+        # Creates a save button
+        save_button = qtw.QPushButton("Save")
+        save_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        save_button.setSizePolicy(size_policy)
+        save_button.clicked.connect(self.save_button_clicked)
+        self.menu_split.addWidget(save_button)
+
+        # Creates a back button
+        back_button = qtw.QPushButton("Cancel")
+        back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        back_button.setSizePolicy(size_policy)
+        back_button.clicked.connect(self.back_button_clicked)
+        self.menu_split.addWidget(back_button)
+
+    def model_dropdown_changed(self,index):
+        self.selected_model = self.model_dropdown.itemText(index)
+        return self.selected_model
+    
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
         self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
         with open(fr"{cwd}\internal/resources\modeldict.json", "r") as f:
             model_dict = json.load(f)
-        # Checks if a folder was chosen
-        if self.folderpath == "":
-            pass
-        elif self.folderpath in model_dict:
-            # Records the new model directory in json
-            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
-                model_dict = json.load(f)
-            model_dict["current_model_directory"] = self.folderpath
-            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
-                json.dump(model_dict, f, indent=4)
-            self.model_label.setText(f"Current Model: {model_dict[self.folderpath]}")
-        else:
-            print(self.folderpath)
-            print(model_dict)
+        # Checks if a folder was returned and if the folder is already in modeldict.json
+        if self.folderpath != "" and self.folderpath not in model_dict:
             self.name_model()
-    
+            
     def name_model(self):
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name your model:')
         if done and name != "":
-            # Records the new model directory and its corresponding name in json
             with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
-            model_dict["current_model_directory"] = self.folderpath
             model_dict[self.folderpath] = name
             with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
                 json.dump(model_dict, f, indent=4)
-            self.model_label.setText(f"Current Model: {name}")
+            self.model_dropdown.addItem(name)
 
-    def back_button_clicked (self):
+    def save_button_clicked(self):
+        # Records the new model directory and its corresponding name in modeldict.json
+            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+                model_dict = json.load(f)
+            selected_model_dir = list(model_dict.keys())[list(model_dict.values()).index(self.selected_model)]
+            model_dict["current_model_directory"] = selected_model_dir
+            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
+                json.dump(model_dict, f, indent=4)
+            for i in range(self.model_dropdown.count()):
+                self.model_dropdown.removeItem(i)
+            self.mw = MainWindow()
+            self.mw.move(self.pos())
+            self.mw.show()
+            self.close()
+
+    def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
         self.mw.show()
