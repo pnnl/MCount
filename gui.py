@@ -11,7 +11,7 @@ import subprocess
 from subprocess import Popen
 
 import config as cfg
-#import thresholdingClumpCount as thcc
+import thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
@@ -141,13 +141,13 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
-        global image_dir_counting
+        global image_dir
 
         # Opens file explorer to choose images
-        image_dir_counting = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
+        image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
         
         #Checks if images were chosen
-        if image_dir_counting != "":
+        if image_dir != "":
             # Removes file button and back button
             self.file_button.setParent(None)
             self.back_button.setParent(None)
@@ -187,8 +187,7 @@ class CountWindow(qtw.QWidget):
 
         #if thresh button is checked run the file
         if (self.thresh_button.checkState()):
-            #musselCount = thcc.count
-            #print(musselCount)
+            thcc.threshFunction(image_dir)
 
 
 class TrainWindow (qtw.QWidget):
@@ -397,3 +396,6 @@ mw = MainWindow()
 
 # Runs the app 
 app.exec_()
+
+
+
