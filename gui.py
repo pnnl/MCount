@@ -141,11 +141,13 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
+        global image_dir_counting
+
         # Opens file explorer to choose images
-        image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
+        image_dir_counting = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
         
         #Checks if images were chosen
-        if image_dir != "":
+        if image_dir_counting != "":
             # Removes file button and back button
             self.file_button.setParent(None)
             self.back_button.setParent(None)
@@ -166,8 +168,6 @@ class CountWindow(qtw.QWidget):
 
             # Adds the back button
             self.layout().addWidget(self.back_button)
-
-        image_dir = "\n\nbob\n\n"
 
     def back_button_clicked (self):
         self.mw = MainWindow()
