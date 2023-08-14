@@ -8,8 +8,6 @@ import sys
 import os
 import subprocess
 
-from subprocess import Popen
-
 import config as cfg
 import thresholdingClumpCount as thcc
 
@@ -176,20 +174,27 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def cont_button_clicked(self):
-        # Removes widgets from the layout
-        self.thresh_button.setParent(None)
-        self.sheet_button.setParent(None)
-        self.back_button.setParent(None)
-        self.run_button.setParent(None)
-        # Changes title text
-        self.title_label.setText("Count in Progress...")
-        self.layout().addWidget(self.back_button)
+        #name the count
+        name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
+        if name and done:
+            self.close()
+            name_of_the_count = name
 
-        #if thresh button is checked run the file
-        if (self.thresh_button.checkState()):
-            thcc.threshFunction(image_dir)
+        if (done):
+            # Removes widgets from the layout
+            self.thresh_button.setParent(None)
+            self.sheet_button.setParent(None)
+            self.back_button.setParent(None)
+            self.run_button.setParent(None)
+            # Changes title text
+            self.title_label.setText("Count in Progress...")
+            self.layout().addWidget(self.back_button)
 
-        self.title_label.setText("Done")
+            #if thresh button is checked run the file
+            if (self.thresh_button.checkState()):
+                thcc.threshFunction(image_dir, name_of_the_count)
+
+            self.title_label.setText("Done")
 
 
 
@@ -256,6 +261,7 @@ class TrainWindow (qtw.QWidget):
             tfrecord_dir = cwd + "/external/training/"
             script_name = "internal/scripts/generate_tfrecord.py"
             subprocess.Popen(["start", "cmd", "/k", "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", tfrecord_dir + f"{name}.record", "-i", self.xml_dir, "-c", tfrecord_dir + f"{name}.csv"], shell=True)
+
         
     def back_button_clicked(self):
         self.mw = MainWindow()

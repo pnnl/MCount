@@ -17,7 +17,7 @@ from PIL import Image, ImageEnhance
 from pathlib import Path
 
 
-def threshFunction (image_dir_counting):
+def threshFunction (image_dir_counting, countName):
     # -*- coding: utf-8 -*-
     """
     Created on Wed Jul 28 07:07:59 2023
@@ -47,7 +47,15 @@ def threshFunction (image_dir_counting):
     # get the path/directory
 
     #sheet=pd.read_excel("musselCountingTest.xlsx")
-    countSheet = pd.ExcelWriter('musselCountingTest.xlsx', engine='xlsxwriter')
+
+    locationForThis = "external\\detections\\images\\thresholding\\"+  countName
+
+    try:
+        os.mkdir(ntpath.abspath(locationForThis))
+    except:
+        print("skiped")
+    
+    countSheet = pd.ExcelWriter(locationForThis + " \\" + 'musselCountingTest.xlsx', engine='xlsxwriter')
 
     fileNameAry = []
     musselCountAry = []
@@ -133,7 +141,7 @@ def threshFunction (image_dir_counting):
         thingImage = imageUse.split("\\")
         useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
         
-        place = "external\\detections\\images\\thresholding\\"+ useThing
+        place = locationForThis + " \\"+ useThing
         print (place)
         try:
             os.mkdir(ntpath.abspath(place))
