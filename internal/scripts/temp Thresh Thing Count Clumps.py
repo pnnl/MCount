@@ -65,7 +65,7 @@ for image in images:
     #cv2.imwrite((place+"/1_og.jpg"), img)
 
     # Range for lower red
-    lower_red = np.array([0, 65, 0])
+    lower_red = np.array([0, 53, 0])
     upper_red = np.array([100, 255, 255])
     mask1 = cv2.inRange(hsv_img, lower_red, upper_red)
     
