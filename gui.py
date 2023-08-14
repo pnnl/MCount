@@ -11,7 +11,7 @@ import subprocess
 from subprocess import Popen
 
 import config as cfg
-#import thresholdingClumpCount as thcc
+import thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
@@ -187,8 +187,8 @@ class CountWindow(qtw.QWidget):
 
         #if thresh button is checked run the file
         if (self.thresh_button.checkState()):
-            #Popen.system('python thresholdingClumpCount.py')
-            print("")
+            musselCount = thcc.count
+            print(musselCount)
 
 
 class TrainWindow (qtw.QWidget):

@@ -59,4 +59,6 @@ images = Path(folder_dir).glob('*.tif')
 print("\n\n ---------------------------------- ")
 print(folder_dir)
 
+count = 4593847
+
 
