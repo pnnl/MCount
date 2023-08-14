@@ -189,6 +189,9 @@ class CountWindow(qtw.QWidget):
         if (self.thresh_button.checkState()):
             thcc.threshFunction(image_dir)
 
+        self.title_label.setText("Done")
+
+
 
 class TrainWindow (qtw.QWidget):
     def __init__(self):
