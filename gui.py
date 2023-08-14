@@ -167,6 +167,8 @@ class CountWindow(qtw.QWidget):
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
+        image_dir = "\n\nbob\n\n"
+
     def back_button_clicked (self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
@@ -185,7 +187,8 @@ class CountWindow(qtw.QWidget):
 
         #if thresh button is checked run the file
         if (self.thresh_button.checkState()):
-            Popen.system('python thresholdingClumpCount.py')
+            #Popen.system('python thresholdingClumpCount.py')
+            print("")
 
 
 class TrainWindow (qtw.QWidget):
