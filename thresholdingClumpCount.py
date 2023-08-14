@@ -41,7 +41,7 @@ from pathlib import Path
 folder_dir = 'raw tif img'
 
 #sheet=pd.read_excel("musselCountingTest.xlsx")
-countSheet = pd.ExcelWriter('musselCountingTest3.xlsx', engine='xlsxwriter')
+countSheet = pd.ExcelWriter('musselCountingTest.xlsx', engine='xlsxwriter')
 
 fileNameAry = []
 musselCountAry = []
@@ -53,8 +53,9 @@ numPixPerMussle = 150
 # that directory
 #images = Path(folder_dir).glob('*.tif')  
 
-images = gui.file_names
+images = gui.image_dir
 
+print("\n\n ---------------------------------- ")
 print(images)
 
 

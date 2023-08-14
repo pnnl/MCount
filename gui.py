@@ -8,7 +8,10 @@ import sys
 import os
 import subprocess
 
+from subprocess import Popen
+
 import config as cfg
+#import thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
@@ -179,6 +182,10 @@ class CountWindow(qtw.QWidget):
         # Changes title text
         self.title_label.setText("Count in Progress...")
         self.layout().addWidget(self.back_button)
+
+        #if thresh button is checked run the file
+        if (self.thresh_button.checkState()):
+            Popen.system('python thresholdingClumpCount.py')
 
 
 class TrainWindow (qtw.QWidget):
