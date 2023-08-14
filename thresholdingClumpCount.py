@@ -8,7 +8,6 @@ import os
 
 import urllib.request
 from PIL import Image
-from patchify import patchify
 
 from PIL import Image, ImageDraw, ImageFilter
 
