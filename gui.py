@@ -6,7 +6,9 @@ import threading
 import json
 import sys
 import os
+import re
 import subprocess
+import time
 
 from subprocess import Popen
 
@@ -106,7 +108,6 @@ class MainWindow(qtw.QWidget):
 
     def help_button_clicked(self):
         os.startfile('README.md')
-
     
     def quit_button_clicked(self):
         self.close()
@@ -163,7 +164,7 @@ class CountWindow(qtw.QWidget):
             # Creates a run button
             self.run_button = qtw.QPushButton("Run Model")
             self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.run_button.clicked.connect(self.cont_button_clicked)
+            self.run_button.clicked.connect(self.run_button_clicked)
             self.layout().addWidget(self.run_button)
 
             # Adds the back button
@@ -175,7 +176,7 @@ class CountWindow(qtw.QWidget):
         self.mw.show()
         self.close()
 
-    def cont_button_clicked(self):
+    def run_button_clicked(self):
         # Removes widgets from the layout
         self.thresh_button.setParent(None)
         self.sheet_button.setParent(None)
@@ -237,7 +238,7 @@ class TrainWindow (qtw.QWidget):
             self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
             self.layout().addWidget(self.labelmap_button)
             self.layout().addWidget(self.back_button)
-    
+
     def labelmap_button_clicked(self):
         self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
         if self.labelmap:
@@ -248,15 +249,48 @@ class TrainWindow (qtw.QWidget):
             self.train_button.clicked.connect(self.train_button_clicked)
             self.layout().addWidget(self.train_button)
             self.layout().addWidget(self.back_button)
-            
-    def train_button_clicked(self):
-        name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this training:')
-        if name and done:
-            self.close()
-            tfrecord_dir = cwd + "/external/training/"
-            script_name = "internal/scripts/generate_tfrecord.py"
-            subprocess.Popen(["start", "cmd", "/k", "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", tfrecord_dir + f"{name}.record", "-i", self.xml_dir, "-c", tfrecord_dir + f"{name}.csv"], shell=True)
+    
+    def ckpt_parse(self):
+        # Parses ckpts and chooses the highest one
+        files = os.listdir(self.model_dir)
+        num_check = re.compile(r'\d+')
+        ckpt_files = []
+        for file in files:
+            match = num_check.findall(file)
+            if match:
+                ckpt_files.append((int(match[0]), file))
+        self.last_ckpt = os.path.splitext(max(ckpt_files, key = lambda x: x[0])[1])[0]
         
+        # Writes tfrecord and ckpt paths in pipeline.config
+        with open(self.pipeline_dir, "r") as f:
+            config = json.load(f)
+        config["train_config"]["fine_tune_checkpoint"] = self.model_dir + "/" + self.last_ckpt
+        config["train_input_reader"]["label_map_path"] = self.labelmap
+        config["train_input_reader"]["tf_record_input_reader"]["input_path"] = self.tfrecord_dir + f"{self.name}.record"
+        with open (self.pipeline_dir, "w") as f:
+            json.dump(config, f)
+
+    def train_button_clicked(self):
+        self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this training:')
+        if self.name != "" and done:
+            # Closes the window
+            self.close()
+            
+            # Defines paths to model folders/files
+            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+                model_dict = json.load(f)
+            self.tfrecord_dir = cwd + "/external/training/"
+            script_name = "internal/scripts/generate_tfrecord.py"
+            self.model_dir = model_dict["current_model_directory"]
+            self.pipeline_dir = self.model_dir + "/pipeline.config"
+            
+            self.ckpt_parse()
+            
+            # Opens CMD and runs tfrecord generation, then begins training (I don't know a good way to seperate these processes)
+            subprocess.Popen(["start", "cmd", "/k" "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir + f"{self.name}.record", "-i", self.xml_dir, "-c", self.tfrecord_dir + f"{self.name}.csv"], shell=True)
+            time.sleep(5)
+            subprocess.Popen(["start", "cmd", "/k", "python", f"{cwd}/internal/scripts/model_main_tf2.py", f"--model_dir={self.model_dir}", f"--pipeline_config_path={self.model_dir}/pipeline.config"], shell=True)
+    
     def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())

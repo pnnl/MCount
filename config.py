@@ -2,7 +2,7 @@
 default_font = "Leelawadee"
 
 # Sets the initial directory the file dialog will open to when you select files
-initial_directory = "C:/"
+initial_directory = "C:/Users/mill286/Desktop"
 
 # Font color used for all headers
 header_color = "#D77600"
