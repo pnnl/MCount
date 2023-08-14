@@ -1,4 +1,22 @@
-    
+import numpy as np
+import cv2
+import math
+import ntpath
+import pandas as pd
+
+import os
+
+import urllib.request
+from PIL import Image
+from patchify import patchify
+
+from PIL import Image, ImageDraw, ImageFilter
+
+from PIL import Image, ImageEnhance    
+
+from pathlib import Path
+
+
 def threshFunction (image_dir_counting):
     # -*- coding: utf-8 -*-
     """
@@ -14,21 +32,7 @@ def threshFunction (image_dir_counting):
 
     # import important librarys
 
-    import numpy as np
-    import cv2
-    import math
-    import ntpath
-    import pandas as pd
-
-    import os
-
-    import urllib.request
-    from PIL import Image
-    from patchify import patchify
-
-    from PIL import Image, ImageDraw, ImageFilter
-
-    from PIL import Image, ImageEnhance
+    
 
     #import gui
     #from gui import image_dir
@@ -39,7 +43,6 @@ def threshFunction (image_dir_counting):
     #from google.colab.patches import cv2_imshow
 
     # import required module
-    from pathlib import Path
 
     # get the path/directory
 
