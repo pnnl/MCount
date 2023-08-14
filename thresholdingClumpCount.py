@@ -129,9 +129,11 @@ def threshFunction (image_dir_counting):
         myFinalUse = closing
 
         #saving all the pictures in individual folders from each step    
-  
+
+        thingImage = imageUse.split("\\")
+        useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
         
-        place = "external\\detections\\images\\thresholding\\"+thingImage[len(thingImage)-1][0:len(thingImage[placeNum])-4]
+        place = "external\\detections\\images\\thresholding\\"+ useThing
         print (place)
         try:
             os.mkdir(ntpath.abspath(place))
@@ -200,7 +202,7 @@ def threshFunction (image_dir_counting):
     countSheet.close()
 
 
-    print ("done")
+    print ("\ndone done done")
 
 
 
