@@ -29,6 +29,8 @@ from PIL import Image, ImageDraw, ImageFilter
 from PIL import Image, ImageEnhance
 
 import gui
+from gui import image_dir
+
 import config
 
 #import getpixel
@@ -53,7 +55,7 @@ numPixPerMussle = 150
 # that directory
 #images = Path(folder_dir).glob('*.tif')  
 
-images = gui.image_dir
+images = image_dir
 
 print("\n\n ---------------------------------- ")
 print(images)
