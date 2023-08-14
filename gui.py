@@ -13,7 +13,7 @@ import time
 from subprocess import Popen
 
 import config as cfg
-import thresholdingClumpCount as thcc
+import internal.scripts.thresholdingClumpCount as thcc
 
 cwd = os.getcwd()
 
@@ -176,7 +176,7 @@ class CountWindow(qtw.QWidget):
         self.mw.show()
         self.close()
 
-    def cont_button_clicked(self):
+    def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         if name and done:
