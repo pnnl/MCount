@@ -29,7 +29,7 @@ from PIL import Image, ImageDraw, ImageFilter
 from PIL import Image, ImageEnhance
 
 import gui
-from gui import image_dir
+#from gui import image_dir
 
 import config
 
@@ -40,7 +40,7 @@ import config
 from pathlib import Path
 
 # get the path/directory
-folder_dir = 'raw tif img'
+folder_dir = gui.image_dir_counting
 
 #sheet=pd.read_excel("musselCountingTest.xlsx")
 countSheet = pd.ExcelWriter('musselCountingTest.xlsx', engine='xlsxwriter')
@@ -53,11 +53,10 @@ numPixPerMussle = 150
 
 # iterate over files in
 # that directory
-#images = Path(folder_dir).glob('*.tif')  
+images = Path(folder_dir).glob('*.tif')  
 
-images = image_dir
 
 print("\n\n ---------------------------------- ")
-print(images)
+print(folder_dir)
 
 
