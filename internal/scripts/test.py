@@ -11,8 +11,33 @@ import subprocess
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QComboBox
 
-# creating a new dictionary
-my_dict ={"Java":100, "Python":112, "C":11}
- 
-# one-liner
-print("One line Code Key value: ", list(my_dict.keys())[list(my_dict.values()).index(100)])
+import os
+import re
+
+def find_file_with_highest_number(folder_path):
+    # Get a list of files in the folder
+    files = os.listdir(folder_path)
+
+    # Extract numeric values from file names using regular expressions
+    numeric_files = []
+    pattern = re.compile(r'\d+')
+    for file in files:
+        match = pattern.findall(file)
+        if match:
+            numeric_files.append((int(match[0]), file))
+
+    if not numeric_files:
+        return None  # No numeric files found
+
+    # Find the file name with the highest number
+    max_number_file = os.path.splitext(max(numeric_files, key=lambda x: x[0])[1])[0]
+
+    return max_number_file
+
+folder_path = r"C:\Users\mill286\Desktop\Mussel-Counting-AI-App\internal\model"
+highest_number_file = find_file_with_highest_number(folder_path)
+
+if highest_number_file:
+    print(f"The file with the highest number is: {highest_number_file}")
+else:
+    print("No numeric files found in the folder.")
