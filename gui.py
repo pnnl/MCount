@@ -199,7 +199,7 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Count in Progress...")
             self.layout().addWidget(self.back_button)
 
-            if thresh button is checked run the file
+            #if thresh button is checked run the file
             if (self.thresh_button.checkState()):
                 thcc.threshFunction(image_dir, name_of_the_count)
 
