@@ -194,7 +194,7 @@ class CountWindow(qtw.QWidget):
 
         if (done):
             listImages = self.listImage(image_dir)
-            cscd.creatCountDirectorySaving(listImages, name_of_the_count)
+            cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
@@ -206,7 +206,7 @@ class CountWindow(qtw.QWidget):
 
             #if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count)
+                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
 
             self.title_label.setText("Done")
 
@@ -233,7 +233,7 @@ class CountWindow(qtw.QWidget):
             
             names.append(useThing)
 
-        return names
+        return [images, names]
 
 
 

@@ -16,7 +16,7 @@ from PIL import Image, ImageEnhance
 from pathlib import Path
 
 
-def threshFunction (image_dir_counting, countName):
+def threshFunction (image_dir_counting, countName, imagess):
     # -*- coding: utf-8 -*-
     """
     Created on Wed Jul 28 07:07:59 2023
@@ -59,17 +59,7 @@ def threshFunction (image_dir_counting, countName):
 
     # iterate over files in
     # that directory
-    images = []
-
-    images1 = Path(image_dir_counting).glob('*.tif')
-    for i in images1:
-        images.append(i)
-    images1 = Path(image_dir_counting).glob('*.jpg')
-    for i in images1:
-        images.append(i)
-    images1 = Path(image_dir_counting).glob('*.png')
-    for i in images1:
-        images.append(i)
+    images = imagess
 
     print("\n\n ---------------------------------- ")
     print(image_dir_counting)
