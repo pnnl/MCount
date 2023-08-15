@@ -10,12 +10,18 @@ import re
 import subprocess
 import time
 
+import numpy as np
+import ntpath
+import pandas as pd
+import urllib.request
+from pathlib import Path
+
+
 from subprocess import Popen
 
 import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
-import internal.scripts.makeListOfImages as mloi
 
 cwd = os.getcwd()
 
@@ -183,12 +189,11 @@ class CountWindow(qtw.QWidget):
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         name_of_the_count = "temp"
         if name and done:
-            self.close()
             name_of_the_count = name
 
 
         if (done):
-            listImages = mloi.listImage(image_dir)
+            listImages = self.listImage(image_dir)
             cscd.creatCountDirectorySaving(listImages, name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
@@ -204,6 +209,32 @@ class CountWindow(qtw.QWidget):
                 thcc.threshFunction(image_dir, name_of_the_count)
 
             self.title_label.setText("Done")
+
+    
+    def listImage (image_dir_counting):
+        images = []
+
+        images1 = Path(image_dir_counting).glob('*.tif')
+        for i in images1:
+            images.append(i)
+        images1 = Path(image_dir_counting).glob('*.jpg')
+        for i in images1:
+            images.append(i)
+        images1 = Path(image_dir_counting).glob('*.png')
+        for i in images1:
+            images.append(i)
+
+        names = []
+
+        for i in images:
+            temp = ntpath.abspath(i)
+            thingImage = temp.split("\\")
+            useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            
+            names.append(useThing)
+
+        return names
+
 
 
 
