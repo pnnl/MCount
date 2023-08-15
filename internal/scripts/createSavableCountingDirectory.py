@@ -4,7 +4,7 @@ import os
 import urllib.request
 from pathlib import Path
 
-def creatCountDirectorySaving (countName):
+def creatCountDirectorySaving (imageList, countName):
     locationForThis = "external\\detections\\"+  countName
     try:
         os.mkdir(ntpath.abspath(locationForThis))
@@ -39,3 +39,13 @@ def creatCountDirectorySaving (countName):
     except:
         print("skiped")
 
+
+    
+    location = "external\\detections\\"+  countName + "\\spreadsheets"
+    musselSheet = pd.ExcelWriter(location + "\\" + 'overall_mussel_counts.xlsx', engine='xlsxwriter')
+
+    dfFull = pd.DataFrame({'File Name': imageList, })
+
+    dfFull.to_excel(musselSheet, sheet_name='Total', index=False)
+
+    musselSheet.close()

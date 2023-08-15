@@ -15,6 +15,7 @@ from subprocess import Popen
 import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
+import internal.scripts.makeListOfImages as mloi
 
 cwd = os.getcwd()
 
@@ -187,7 +188,8 @@ class CountWindow(qtw.QWidget):
 
 
         if (done):
-            cscd.creatCountDirectorySaving(name_of_the_count)
+            listImages = mloi.listImage(image_dir)
+            cscd.creatCountDirectorySaving(listImages, name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
