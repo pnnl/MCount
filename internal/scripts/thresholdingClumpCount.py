@@ -47,14 +47,9 @@ def threshFunction (image_dir_counting, countName):
 
     #sheet=pd.read_excel("musselCountingTest.xlsx")
 
-    locationForThis = "external\\detections\\images\\thresholding\\"+  countName
+    locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
 
-    try:
-        os.mkdir(ntpath.abspath(locationForThis))
-    except:
-        print("skiped")
-    
-    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'musselCountingTest.xlsx', engine='xlsxwriter')
+    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'thresholdingClumpMusselCountingTest.xlsx', engine='xlsxwriter')
 
     fileNameAry = []
     musselCountAry = []
@@ -64,9 +59,17 @@ def threshFunction (image_dir_counting, countName):
 
     # iterate over files in
     # that directory
-    images = Path(image_dir_counting).glob('*.tif')
-    images += Path(image_dir_counting).glob('*.jpg')
-    images += Path(image_dir_counting).glob('*.png')
+    images = []
+
+    images1 = Path(image_dir_counting).glob('*.tif')
+    for i in images1:
+        images.append(i)
+    images1 = Path(image_dir_counting).glob('*.jpg')
+    for i in images1:
+        images.append(i)
+    images1 = Path(image_dir_counting).glob('*.png')
+    for i in images1:
+        images.append(i)
 
     print("\n\n ---------------------------------- ")
     print(image_dir_counting)
@@ -141,6 +144,8 @@ def threshFunction (image_dir_counting, countName):
         thingImage = imageUse.split("\\")
         useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
         
+        locationForThis = "external\\detections\\"+  countName + "\\images\\thresholding"
+
         place = locationForThis + "\\"+ useThing
         print (place)
         try:

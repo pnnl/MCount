@@ -14,6 +14,7 @@ from subprocess import Popen
 
 import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
+import internal.scripts.createSavableCountingDirectory as cscd
 
 cwd = os.getcwd()
 
@@ -179,11 +180,14 @@ class CountWindow(qtw.QWidget):
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
+        name_of_the_count = "temp"
         if name and done:
             self.close()
             name_of_the_count = name
 
+
         if (done):
+            cscd.creatCountDirectorySaving(name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
