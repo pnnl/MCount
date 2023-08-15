@@ -211,7 +211,7 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Done")
 
     
-    def listImage (image_dir_counting):
+    def listImage (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
