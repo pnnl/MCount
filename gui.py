@@ -161,6 +161,8 @@ class CountWindow(qtw.QWidget):
         self.file_button.setParent(None)
         self.past_counts_button.setParent(None)
 
+        self.selection = ""
+
         self.title_label = qtw.QLabel("View Past\nDetection Counts")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
@@ -191,26 +193,54 @@ class CountWindow(qtw.QWidget):
         self.dropdown_layout.addWidget(self.model_dropdown)
 
         # Pulls models from modeldict.json and adds them to the dropdown
-        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
-            model_dict = json.load(f)
-            values = list(model_dict.values())
-        directory = model_dict["current_model_directory"]
-        model_name = model_dict[directory]
-        self.model_dropdown.addItem(model_name)
-        for item in values[1:]:
-            if item != model_name:
-                self.model_dropdown.addItem(item)
-    
-        # Creates a file dialog button
-        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
-        self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.past_counts_button.clicked.connect(self.view_past)
-        self.layout().addWidget(self.past_counts_button)    
+        directory = cwd + "/external/detections"
+        dirs = os.listdir(directory)
+        dirs.remove("placeholder")
+        for item in dirs:
+            self.model_dropdown.addItem(item)
+        
+        # Creates a next button
+        self.next_button = qtw.QPushButton("Next")
+        self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.next_button.clicked.connect(self.next_once_selected)
+        self.layout().addWidget(self.next_button)    
 
         self.layout().addWidget(self.back_button)
 
+    def next_once_selected(self, index):
+        self.title_label.setText("Count: " +  self.selection)
+        self.back_button.setText("Home")
+
+        self.next_button.setParent(None)
+        self.model_dropdown.setParent(None)
+        self.model_label.setParent(None)
+        
+        # Creates an open pictures button
+        self.open_pics = qtw.QPushButton("Open Detection Pictures")
+        self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.selection))
+        self.layout().addWidget(self.open_pics)
+
+        # Creates an open excell button
+        self.open_sheet = qtw.QPushButton("Open Excel Count")
+        self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.selection))
+        self.layout().addWidget(self.open_sheet)
+
+        # Adds the back button
+        self.layout().addWidget(self.back_button)
+
+    def model_dropdown_changed(self,index):
+        # Records the new selected model (count version) anytime the dropdown menu is changed
+        self.selected_model = self.model_dropdown.itemText(index)
+        self.selection = self.model_dropdown.itemText(index) 
+        return self.selected_model
+    
+    
     def file_button_clicked(self):
         global image_dir
+
+        self.past_counts_button.setParent(None)
 
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
@@ -222,7 +252,7 @@ class CountWindow(qtw.QWidget):
             self.back_button.setParent(None)
 
             # Creates checkboxes for thresholding and spreadsheet
-            self.thresh_button = qtw.QCheckBox("Run Mussel Thresholding")
+            self.thresh_button = qtw.QCheckBox("Run Thresholding")
             self.thresh_button.setChecked(True)
             self.layout().addWidget(self.thresh_button)
             self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
@@ -256,33 +286,30 @@ class CountWindow(qtw.QWidget):
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
+        name_of_count = "Unamed"
         if name and done:
             name_of_count = name
-            name_of_the_count = name
         
-        print(name_of_the_count)
+        #print(name_of_the_count)
+
 
         if done:
+            list_images = self.list_image(image_dir)
+            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
             self.back_button.setParent(None)
             self.run_button.setParent(None)
-
-            # Changes title label and adds cancel button
+            # Changes title text
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
-            
-            name_of_count = "Unamed"
-            list_images = self.list_image(image_dir)
-            
-            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
-            
-            tiling.tile(list_images[0], f"{cwd}/external/detections/{name_of_count}")
 
-            # If thresh button is checked run the file
+            #tiling.tile(list_images[0], f"{cwd}/external/detections")
+
+            # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
+                thcc.threshFunction(image_dir, name_of_count, list_images[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -290,20 +317,23 @@ class CountWindow(qtw.QWidget):
             # Creates an open pictures button
             self.open_pics = qtw.QPushButton("Open Detection Pictures")
             self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_the_count))
+            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_count))
             self.layout().addWidget(self.open_pics)
 
-            # Creates an open excel button
-            self.open_sheet = qtw.QPushButton("Open Mussel Count Excel")
+            # Creates an open excell button
+            self.open_sheet = qtw.QPushButton("Open Excel Count")
             self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_the_count))
+            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_count))
             self.layout().addWidget(self.open_sheet)
 
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
-    def listImage (self, image_dir_counting):
+
+    
+    def list_image (self, image_dir_counting):
         images = []
+
         images1 = Path(image_dir_counting).glob('*.tif')
         for i in images1:
             images.append(i)
@@ -315,12 +345,18 @@ class CountWindow(qtw.QWidget):
             images.append(i)
 
         names = []
+        
         for i in images:
-            basename = os.path.basename(i)
+            #temp = ntpath.abspath(i)
+            #thingImage = temp.split("\\")
+            #useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            useThing = os.path.basename(i)
             
-            names.append(basename)
+            names.append(useThing)
 
         return [images, names]
+
+
 
 
 class TrainWindow (qtw.QWidget):
@@ -515,9 +551,10 @@ class SelectWindow (qtw.QWidget):
         back_button.clicked.connect(self.back_button_clicked)
         self.menu_split.addWidget(back_button)
 
-    def model_dropdown_changed(self, index):
+    def model_dropdown_changed(self,index):
         # Records the new selected model anytime the dropdown menu is changed
         self.selected_model = self.model_dropdown.itemText(index)
+        return self.selected_model
     
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
