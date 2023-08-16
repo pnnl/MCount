@@ -286,15 +286,14 @@ class CountWindow(qtw.QWidget):
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
+        name_of_count = "Unamed"
         if name and done:
             name_of_count = name
-            name_of_the_count = name
         
         #print(name_of_the_count)
 
 
         if done:
-            name_of_count = "Unamed"
             list_images = self.list_image(image_dir)
             cscd.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
@@ -306,13 +305,11 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
 
-            tiling.tile(list_images[0], f"{cwd}/external/detections")
-
-            
+            #tiling.tile(list_images[0], f"{cwd}/external/detections")
 
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
+                thcc.threshFunction(image_dir, name_of_count, list_images[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -320,13 +317,13 @@ class CountWindow(qtw.QWidget):
             # Creates an open pictures button
             self.open_pics = qtw.QPushButton("Open Detection Pictures")
             self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_the_count))
+            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_count))
             self.layout().addWidget(self.open_pics)
 
             # Creates an open excell button
             self.open_sheet = qtw.QPushButton("Open Excel Count")
             self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_the_count))
+            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_count))
             self.layout().addWidget(self.open_sheet)
 
             # Adds the back button
