@@ -312,7 +312,7 @@ class CountWindow(qtw.QWidget):
 
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
+                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -334,7 +334,7 @@ class CountWindow(qtw.QWidget):
 
 
     
-    def listImage (self, image_dir_counting):
+    def list_image (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
