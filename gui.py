@@ -2,22 +2,20 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
 
-import threading
 import json
 import sys
 import os
-import re
 import subprocess
 import time
 import textwrap
 import numpy as np
 import ntpath
 import pandas as pd
-import urllib.request
 from pathlib import Path
 
 import config as cfg
-import internal.scripts.thresholdingClumpCount as thcc
+import internal.scripts.tiling as tiling
+import internal.scripts.thresholding as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
 
 cwd = ((repr(os.getcwd())).replace(r"\\", "/")).replace(r"'", "")
@@ -152,7 +150,7 @@ class CountWindow(qtw.QWidget):
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
         
-        #Checks if images were chosen
+        # Checks if images were chosen
         if image_dir != "":
             # Removes file button and back button
             self.file_button.setParent(None)
@@ -184,13 +182,13 @@ class CountWindow(qtw.QWidget):
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
-        name_of_the_count = "temp"
         if name and done:
-            name_of_the_count = name
+            name_of_count = name
 
-        if (done):
-            listImages = self.listImage(image_dir)
-            cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
+        if done:
+            name_of_count = "Unamed"
+            list_images = self.list_image(image_dir)
+            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
@@ -200,14 +198,18 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Count in Progress...")
             self.layout().addWidget(self.back_button)
 
-            #if thresh button is checked run the file
+            tiling.tile(list_images[0], f"{cwd}/external/detections")
+
+            
+
+            # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
+                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
 
             self.title_label.setText("Done")
 
     
-    def listImages (self, image_dir_counting):
+    def list_images (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
