@@ -9,21 +9,18 @@ import os
 import re
 import subprocess
 import time
-
+import textwrap
 import numpy as np
 import ntpath
 import pandas as pd
 import urllib.request
 from pathlib import Path
 
-
-from subprocess import Popen
-
 import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
 
-cwd = os.getcwd()
+cwd = ((repr(os.getcwd())).replace(r"\\", "/")).replace(r"'", "")
 
 def defaultUI(window):
     # Adds a title 
@@ -34,7 +31,7 @@ def defaultUI(window):
 
     # Sets default layout for entire window
     window.setLayout(qtw.QVBoxLayout())
-    window.layout().setSpacing(15)
+    window.layout().setSpacing(12)
     
     # Creates window at specific size
     window.setMinimumSize(500, 325)
@@ -191,7 +188,6 @@ class CountWindow(qtw.QWidget):
         if name and done:
             name_of_the_count = name
 
-
         if (done):
             listImages = self.listImage(image_dir)
             cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
@@ -211,7 +207,7 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Done")
 
     
-    def listImage (self, image_dir_counting):
+    def listImages (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
@@ -234,8 +230,6 @@ class CountWindow(qtw.QWidget):
             names.append(useThing)
 
         return [images, names]
-
-
 
 
 class TrainWindow (qtw.QWidget):
@@ -294,25 +288,30 @@ class TrainWindow (qtw.QWidget):
             self.layout().addWidget(self.train_button)
             self.layout().addWidget(self.back_button)
     
-    def ckpt_parse(self):
-        # Parses ckpts and chooses the highest one
-        files = os.listdir(self.model_dir)
-        num_check = re.compile(r'\d+')
-        ckpt_files = []
-        for file in files:
-            match = num_check.findall(file)
-            if match:
-                ckpt_files.append((int(match[0]), file))
-        self.last_ckpt = os.path.splitext(max(ckpt_files, key = lambda x: x[0])[1])[0]
-        
-        # Writes tfrecord and ckpt paths in pipeline.config
-        with open(self.pipeline_dir, "r") as f:
-            config = json.load(f)
-        config["train_config"]["fine_tune_checkpoint"] = self.model_dir + "/" + self.last_ckpt
-        config["train_input_reader"]["label_map_path"] = self.labelmap
-        config["train_input_reader"]["tf_record_input_reader"]["input_path"] = self.tfrecord_dir + f"{self.name}.record"
-        with open (self.pipeline_dir, "w") as f:
-            json.dump(config, f)
+    def config_parse(self):
+        # Sets important config keys
+        key1 = "input_path:"
+        key2 = "label_map_path:"
+        key3 = "fine_tune_checkpoint:"
+
+        # Reads the  config file and processes lines
+        with open(self.model_dir + "/pipeline.config", "r") as file:
+            lines = file.readlines()
+
+        # Changes lines that contain the right keys to give correct paths 
+        for i, line in enumerate(lines):
+            if key1 in line:
+                lines[i] = textwrap.indent(f'{key1} "{self.tfrecord_dir}" \n', "    ")
+            
+            elif key2 in line:
+                lines[i] = textwrap.indent(f'{key2} "{self.labelmap}" \n', "  ")
+
+            elif key3 in line:
+                lines[i] = textwrap.indent(f'{key3} "{self.ckpt_path}" \n', "  ")
+            
+        # Writes the modified lines back to the file
+        with open(self.model_dir + "/pipeline.config", "w") as file:
+            file.writelines(lines)
 
     def train_button_clicked(self):
         self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this training:')
@@ -323,15 +322,17 @@ class TrainWindow (qtw.QWidget):
             # Defines paths to model folders/files
             with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
-            self.tfrecord_dir = cwd + "/external/training/"
-            script_name = "internal/scripts/generate_tfrecord.py"
+            self.tfrecord_dir = cwd + "/external/training/"+ f"{self.name}.record"
+            self.csv_path = cwd + "/external/training/"+ f"{self.name}.csv"
+            self.script_name = cwd + "/internal/scripts/tefrecord_generation.py"
             self.model_dir = model_dict["current_model_directory"]
+            self.ckpt_path = self.model_dir + "/reference_model/checkpoint/ckpt-0"
             self.pipeline_dir = self.model_dir + "/pipeline.config"
             
-            self.ckpt_parse()
+            self.config_parse()
             
             # Opens CMD and runs tfrecord generation, then begins training (I don't know a good way to seperate these processes)
-            subprocess.Popen(["start", "cmd", "/k" "python", script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir + f"{self.name}.record", "-i", self.xml_dir, "-c", self.tfrecord_dir + f"{self.name}.csv"], shell=True)
+            subprocess.Popen(["start", "cmd", "/k", "python", self.script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir, "-i", self.xml_dir, "-c", self.csv_path], shell=True)
             time.sleep(5)
             subprocess.Popen(["start", "cmd", "/k", "python", f"{cwd}/internal/scripts/model_main_tf2.py", f"--model_dir={self.model_dir}", f"--pipeline_config_path={self.model_dir}/pipeline.config"], shell=True)
     
