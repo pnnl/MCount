@@ -16,6 +16,9 @@ import pandas as pd
 import urllib.request
 from pathlib import Path
 
+
+from subprocess import Popen
+
 import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
@@ -181,6 +184,18 @@ class CountWindow(qtw.QWidget):
         self.mw.show()
         self.close()
 
+    def open_pics_button_clicked (self, countName):
+        self.mw = MainWindow()
+        self.mw.move(self.pos())
+        self.mw.show()
+        self.close()
+
+    def open_sheet_button_clicked (self, countName):
+        self.mw = MainWindow()
+        self.mw.move(self.pos())
+        self.mw.show()
+        self.close()
+
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
@@ -188,23 +203,42 @@ class CountWindow(qtw.QWidget):
         if name and done:
             name_of_the_count = name
 
+
         if (done):
             listImages = self.listImage(image_dir)
-            cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
+            #cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
             self.back_button.setParent(None)
             self.run_button.setParent(None)
             # Changes title text
-            self.title_label.setText("Count in Progress...")
+            self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
 
             #if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
+                print("thing_____________________________________________________")
+                #thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
 
-            self.title_label.setText("Done")
+            self.title_label.setText("Detection Complete")
+            self.back_button.setText("Home")
+
+            # Creates an open pictures button
+            self.open_pics = qtw.QPushButton("Open Detection Pictures")
+            self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.open_pics.clicked.connect(self.open_pics_button_clicked)
+            self.layout().addWidget(self.open_pics(name_of_the_count))
+
+            # Creates an open excell button
+            self.open_sheet = qtw.QPushButton("Open Mussel Count Excel")
+            self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.open_sheet.clicked.connect(self.open_sheet_button_clicked)
+            self.layout().addWidget(self.open_sheet(name_of_the_count))
+
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
+
 
     
     def listImages (self, image_dir_counting):
@@ -230,6 +264,8 @@ class CountWindow(qtw.QWidget):
             names.append(useThing)
 
         return [images, names]
+
+
 
 
 class TrainWindow (qtw.QWidget):
