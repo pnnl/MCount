@@ -157,11 +157,20 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def view_past(self):
-        self.title_label = qtw.QLabel("View Past Detection Counts")
+        # Removes file button and back button
+        self.title_label.setParent(None)
+        self.file_button.setParent(None)
+        self.past_counts_button.setParent(None)
+
+        self.title_label = qtw.QLabel("View Past\nDetection Counts")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
         self.title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(self.title_label)
+
+
+
+        self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
         global image_dir
