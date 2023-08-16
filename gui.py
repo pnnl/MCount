@@ -143,11 +143,25 @@ class CountWindow(qtw.QWidget):
         self.file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(self.file_button)    
         
+
+        # Creates a file dialog button
+        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
+        self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_button.clicked.connect(self.view_past)
+        self.layout().addWidget(self.past_counts_button)    
+        
         # Creates a back button
         self.back_button = qtw.QPushButton("Cancel")
         self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.back_button.clicked.connect(self.back_button_clicked)
         self.layout().addWidget(self.back_button)
+
+    def view_past(self):
+        self.title_label = qtw.QLabel("View Past Detection Counts")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
 
     def file_button_clicked(self):
         global image_dir
@@ -185,8 +199,9 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def open_pics_button_clicked (self, countName):
-        subprocess.Popen(r'explorer /select,"C:\\path\\of\\folder\\file"')
-
+        #subprocess.Popen(f'explorer /select,"{cwd}/external/detections/{countName}/images"')
+        paths = "external\\detections\\"+  countName + "\\images"
+        os.startfile(paths)
 
     def open_sheet_button_clicked (self, countName):
         paths = "external\\detections\\"+  countName + "\\spreadsheets"
@@ -198,11 +213,13 @@ class CountWindow(qtw.QWidget):
         name_of_the_count = "temp"
         if name and done:
             name_of_the_count = name
+        
+        print(name_of_the_count)
 
 
         if (done):
             listImages = self.listImage(image_dir)
-            #cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
+            cscd.creatCountDirectorySaving(listImages[1], name_of_the_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
@@ -214,8 +231,7 @@ class CountWindow(qtw.QWidget):
 
             #if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                print("thing_____________________________________________________")
-                #thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
+                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -223,21 +239,21 @@ class CountWindow(qtw.QWidget):
             # Creates an open pictures button
             self.open_pics = qtw.QPushButton("Open Detection Pictures")
             self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_pics.clicked.connect(self.open_pics_button_clicked)
-            self.layout().addWidget(self.open_pics(name_of_the_count))
+            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_the_count))
+            self.layout().addWidget(self.open_pics)
 
             # Creates an open excell button
             self.open_sheet = qtw.QPushButton("Open Mussel Count Excel")
             self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_sheet.clicked.connect(self.open_sheet_button_clicked)
-            self.layout().addWidget(self.open_sheet(name_of_the_count))
+            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_the_count))
+            self.layout().addWidget(self.open_sheet)
 
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
 
     
-    def listImages (self, image_dir_counting):
+    def listImage (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
