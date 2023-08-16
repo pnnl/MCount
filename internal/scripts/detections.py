@@ -33,7 +33,7 @@ os.chdir(r"C:\Users\mill286")
 # my_ssd27_320_iou05_solos_only was the final model we used for evaluating the summer 2022 mussel results
 CUSTOM_MODEL_NAME = 'my_ssd_resnet50_v1_fpn' # *** Enter here the name of the model you trained. ***
 #CUSTOM_MODEL_NAME = 'my_ssd32'
-TF_RECORD_SCRIPT_NAME = 'generate_tfrecord.py'
+TF_RECORD_SCRIPT_NAME = 'tfrecord_generation.py'
 LABEL_MAP_NAME = 'label_map.pbtxt'
 paths = {
     'WORKSPACE_PATH': os.path.join('tensorflow', 'workspace'),
