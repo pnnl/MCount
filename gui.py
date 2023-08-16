@@ -13,12 +13,16 @@ import ntpath
 import pandas as pd
 from pathlib import Path
 
+
+from subprocess import Popen
+
 import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
 
-cwd = ((repr(os.getcwd())).replace(r"\\", "/")).replace(r"'", "")
+cwd = (os.getcwd()).replace("\\", "/")
+print (cwd)
 
 def defaultUI(window):
     # Adds a title 
@@ -138,10 +142,72 @@ class CountWindow(qtw.QWidget):
         self.file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(self.file_button)    
         
+
+        # Creates a view past counts button
+        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
+        self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_button.clicked.connect(self.view_past)
+        self.layout().addWidget(self.past_counts_button)    
+        
         # Creates a back button
         self.back_button = qtw.QPushButton("Cancel")
         self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.back_button.clicked.connect(self.back_button_clicked)
+        self.layout().addWidget(self.back_button)
+
+    def view_past(self):
+        # Removes file button and back button
+        self.title_label.setParent(None)
+        self.file_button.setParent(None)
+        self.past_counts_button.setParent(None)
+
+        self.title_label = qtw.QLabel("View Past\nDetection Counts")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
+
+        # Creates a horizontal layout for the label and dropdown menu to reside in
+        self.dropdown_layout = qtw.QHBoxLayout()
+        self.dropdown_layout.setSpacing(10)
+        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.layout().addLayout(self.dropdown_layout)
+        self.layout().addSpacerItem(verticalSpacer)
+        
+        # Adds a past counts label 
+        self.model_label = qtw.QLabel(f"Past Counts:")
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.model_label.setSizePolicy(size_policy)
+        self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_label.setAlignment(qtc.Qt.AlignCenter)
+        self.dropdown_layout.addWidget(self.model_label)
+        
+        # Creates a dropdown menu of available counts
+        self.model_dropdown = qtw.QComboBox()
+        self.model_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.model_dropdown.setSizePolicy(size_policy)
+        self.dropdown_layout.addWidget(self.model_dropdown)
+
+        # Pulls models from modeldict.json and adds them to the dropdown
+        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+            values = list(model_dict.values())
+        directory = model_dict["current_model_directory"]
+        model_name = model_dict[directory]
+        self.model_dropdown.addItem(model_name)
+        for item in values[1:]:
+            if item != model_name:
+                self.model_dropdown.addItem(item)
+    
+
+        # Creates a file dialog button
+        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
+        self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_button.clicked.connect(self.view_past)
+        self.layout().addWidget(self.past_counts_button)    
+
         self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
@@ -179,11 +245,24 @@ class CountWindow(qtw.QWidget):
         self.mw.show()
         self.close()
 
+    def open_pics_button_clicked (self, countName):
+        #subprocess.Popen(f'explorer /select,"{cwd}/external/detections/{countName}/images"')
+        paths = "external\\detections\\"+  countName + "\\images"
+        os.startfile(paths)
+
+    def open_sheet_button_clicked (self, countName):
+        paths = "external\\detections\\"+  countName + "\\spreadsheets"
+        os.startfile(paths)
+
     def run_button_clicked(self):
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         if name and done:
             name_of_count = name
+            name_of_the_count = name
+        
+        print(name_of_the_count)
+
 
         if done:
             name_of_count = "Unamed"
@@ -195,7 +274,7 @@ class CountWindow(qtw.QWidget):
             self.back_button.setParent(None)
             self.run_button.setParent(None)
             # Changes title text
-            self.title_label.setText("Count in Progress...")
+            self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
 
             tiling.tile(list_images[0], f"{cwd}/external/detections")
@@ -204,12 +283,29 @@ class CountWindow(qtw.QWidget):
 
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
+                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
 
-            self.title_label.setText("Done")
+            self.title_label.setText("Detection Complete")
+            self.back_button.setText("Home")
+
+            # Creates an open pictures button
+            self.open_pics = qtw.QPushButton("Open Detection Pictures")
+            self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_the_count))
+            self.layout().addWidget(self.open_pics)
+
+            # Creates an open excell button
+            self.open_sheet = qtw.QPushButton("Open Mussel Count Excel")
+            self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_the_count))
+            self.layout().addWidget(self.open_sheet)
+
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
+
 
     
-    def list_images (self, image_dir_counting):
+    def listImage (self, image_dir_counting):
         images = []
 
         images1 = Path(image_dir_counting).glob('*.tif')
@@ -223,15 +319,18 @@ class CountWindow(qtw.QWidget):
             images.append(i)
 
         names = []
-
+        
         for i in images:
-            temp = ntpath.abspath(i)
-            thingImage = temp.split("\\")
-            useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            #temp = ntpath.abspath(i)
+            #thingImage = temp.split("\\")
+            #useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            useThing = os.path.basename(i)
             
             names.append(useThing)
 
         return [images, names]
+
+
 
 
 class TrainWindow (qtw.QWidget):
