@@ -177,7 +177,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a past counts label 
-        self.model_label = qtw.QLabel(f"Past Counts:")
+        self.model_label = qtw.QLabel(f"Past Count:")
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
         self.model_label.setSizePolicy(size_policy)
         self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -208,12 +208,12 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def next_once_selected(self, index):
-        self.title_label.setText("Count: " +  self.selection)
+        self.title_label.setText("Past Counts")
         self.back_button.setText("Home")
 
         self.next_button.setParent(None)
-        self.model_dropdown.setParent(None)
-        self.model_label.setParent(None)
+        #self.model_dropdown.setParent(None)
+        #self.model_label.setParent(None)
         
         # Creates an open pictures button
         self.open_pics = qtw.QPushButton("Open Detection Pictures")
@@ -257,7 +257,7 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.thresh_button)
             self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
             self.sheet_button.setChecked(True)
-            self.layout().addWidget(self.sheet_button)
+            #self.layout().addWidget(self.sheet_button)
 
             # Creates a run button
             self.run_button = qtw.QPushButton("Run Model")
