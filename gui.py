@@ -201,7 +201,6 @@ class CountWindow(qtw.QWidget):
             if item != model_name:
                 self.model_dropdown.addItem(item)
     
-
         # Creates a file dialog button
         self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
         self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -263,27 +262,27 @@ class CountWindow(qtw.QWidget):
         
         print(name_of_the_count)
 
-
         if done:
-            name_of_count = "Unamed"
-            list_images = self.list_image(image_dir)
-            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
             self.back_button.setParent(None)
             self.run_button.setParent(None)
-            # Changes title text
+
+            # Changes title label and adds cancel button
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
-
-            tiling.tile(list_images[0], f"{cwd}/external/detections")
-
             
+            name_of_count = "Unamed"
+            list_images = self.list_image(image_dir)
+            
+            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
+            
+            tiling.tile(list_images[0], f"{cwd}/external/detections/{name_of_count}")
 
-            # if thresh button is checked run the file
+            # If thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_the_count, listImages[0])
+                thcc.threshFunction(image_dir, name_of_the_count, list_images[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -294,7 +293,7 @@ class CountWindow(qtw.QWidget):
             self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(name_of_the_count))
             self.layout().addWidget(self.open_pics)
 
-            # Creates an open excell button
+            # Creates an open excel button
             self.open_sheet = qtw.QPushButton("Open Mussel Count Excel")
             self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_the_count))
@@ -303,11 +302,8 @@ class CountWindow(qtw.QWidget):
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
-
-    
     def listImage (self, image_dir_counting):
         images = []
-
         images1 = Path(image_dir_counting).glob('*.tif')
         for i in images1:
             images.append(i)
@@ -319,18 +315,12 @@ class CountWindow(qtw.QWidget):
             images.append(i)
 
         names = []
-        
         for i in images:
-            #temp = ntpath.abspath(i)
-            #thingImage = temp.split("\\")
-            #useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
-            useThing = os.path.basename(i)
+            basename = os.path.basename(i)
             
-            names.append(useThing)
+            names.append(basename)
 
         return [images, names]
-
-
 
 
 class TrainWindow (qtw.QWidget):
@@ -525,10 +515,9 @@ class SelectWindow (qtw.QWidget):
         back_button.clicked.connect(self.back_button_clicked)
         self.menu_split.addWidget(back_button)
 
-    def model_dropdown_changed(self,index):
+    def model_dropdown_changed(self, index):
         # Records the new selected model anytime the dropdown menu is changed
         self.selected_model = self.model_dropdown.itemText(index)
-        return self.selected_model
     
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
