@@ -23,7 +23,8 @@ import config as cfg
 import internal.scripts.thresholdingClumpCount as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
 
-cwd = ((repr(os.getcwd())).replace(r"\\", "/")).replace(r"'", "")
+cwd = (os.getcwd()).replace("\\", "/")
+print (cwd)
 
 def defaultUI(window):
     # Adds a title 
@@ -168,8 +169,40 @@ class CountWindow(qtw.QWidget):
         self.title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(self.title_label)
 
+        # Creates a horizontal layout for the label and dropdown menu to reside in
+        self.dropdown_layout = qtw.QHBoxLayout()
+        self.dropdown_layout.setSpacing(10)
+        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.layout().addLayout(self.dropdown_layout)
+        self.layout().addSpacerItem(verticalSpacer)
+        
+        # Adds a past counts label 
+        self.model_label = qtw.QLabel(f"Past Counts:")
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.model_label.setSizePolicy(size_policy)
+        self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_label.setAlignment(qtc.Qt.AlignCenter)
+        self.dropdown_layout.addWidget(self.model_label)
+        
+        # Creates a dropdown menu of available counts
+        self.model_dropdown = qtw.QComboBox()
+        self.model_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.model_dropdown.setSizePolicy(size_policy)
+        self.dropdown_layout.addWidget(self.model_dropdown)
 
-
+        # Pulls models from modeldict.json and adds them to the dropdown
+        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+            values = list(model_dict.values())
+        directory = model_dict["current_model_directory"]
+        model_name = model_dict[directory]
+        self.model_dropdown.addItem(model_name)
+        for item in values[1:]:
+            if item != model_name:
+                self.model_dropdown.addItem(item)
+    
         self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
