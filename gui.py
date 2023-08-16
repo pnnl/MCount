@@ -185,16 +185,12 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def open_pics_button_clicked (self, countName):
-        self.mw = MainWindow()
-        self.mw.move(self.pos())
-        self.mw.show()
-        self.close()
+        subprocess.Popen(r'explorer /select,"C:\\path\\of\\folder\\file"')
+
 
     def open_sheet_button_clicked (self, countName):
-        self.mw = MainWindow()
-        self.mw.move(self.pos())
-        self.mw.show()
-        self.close()
+        paths = "external\\detections\\"+  countName + "\\spreadsheets"
+        os.startfile(paths)
 
     def run_button_clicked(self):
         #name the count
