@@ -145,7 +145,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.file_button)    
         
 
-        # Creates a file dialog button
+        # Creates a view past counts button
         self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
         self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.past_counts_button.clicked.connect(self.view_past)
@@ -203,6 +203,13 @@ class CountWindow(qtw.QWidget):
             if item != model_name:
                 self.model_dropdown.addItem(item)
     
+
+        # Creates a file dialog button
+        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
+        self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_button.clicked.connect(self.view_past)
+        self.layout().addWidget(self.past_counts_button)    
+
         self.layout().addWidget(self.back_button)
 
     def file_button_clicked(self):
@@ -309,11 +316,12 @@ class CountWindow(qtw.QWidget):
             images.append(i)
 
         names = []
-
+        
         for i in images:
-            temp = ntpath.abspath(i)
-            thingImage = temp.split("\\")
-            useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            #temp = ntpath.abspath(i)
+            #thingImage = temp.split("\\")
+            #useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
+            useThing = os.path.basename(i)
             
             names.append(useThing)
 
