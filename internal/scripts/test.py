@@ -11,33 +11,54 @@ import subprocess
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QComboBox
 
+import textwrap
 import os
 import re
+from pathlib import Path
 
-def find_file_with_highest_number(folder_path):
-    # Get a list of files in the folder
-    files = os.listdir(folder_path)
+cwd = ((repr(os.getcwd())).replace(r"\\", "/")).replace(r"'", "")
 
-    # Extract numeric values from file names using regular expressions
-    numeric_files = []
-    pattern = re.compile(r'\d+')
-    for file in files:
-        match = pattern.findall(file)
-        if match:
-            numeric_files.append((int(match[0]), file))
+print(cwd)
 
-    if not numeric_files:
-        return None  # No numeric files found
+# Defines paths to model folders/files
+with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+    model_dict = json.load(f)
+tfrecord_dir = cwd + "/external/training/"+ f"yooo.record"
+csv_path = cwd + "/external/training/"+ f"yooo.csv"
+script_name = cwd + "/internal/scripts/generate_tfrecord.py"
+model_dir = model_dict["current_model_directory"]
+pipeline_dir = model_dir + "/pipeline.config"
 
-    # Find the file name with the highest number
-    max_number_file = os.path.splitext(max(numeric_files, key=lambda x: x[0])[1])[0]
+files = os.listdir(model_dir)
+num_check = re.compile(r'\d+')
+ckpt_files = []
+for file in files:
+    match = num_check.findall(file)
+    if match:
+        ckpt_files.append((int(match[0]), file))
+last_ckpt = os.path.splitext(max(ckpt_files, key = lambda x: x[0])[1])[0]
+ckpt_path = cwd + "/internal/model/" + last_ckpt
 
-    return max_number_file
+# Sets important config keys
+key1 = "input_path:"
+key2 = "label_map_path:"
+key3 = "fine_tune_checkpoint:"
 
-folder_path = r"C:\Users\mill286\Desktop\Mussel-Counting-AI-App\internal\model"
-highest_number_file = find_file_with_highest_number(folder_path)
+# Reads the  config file and processes lines
+with open(model_dir + "/pipeline.config", "r") as file:
+    lines = file.readlines()
 
-if highest_number_file:
-    print(f"The file with the highest number is: {highest_number_file}")
-else:
-    print("No numeric files found in the folder.")
+# Changes lines that contain the right keys to give correct paths 
+for i, line in enumerate(lines):
+    if key1 in line:
+        lines[i] = textwrap.indent(f'{key1} "{tfrecord_dir}" \n', "    ")
+    
+    elif key2 in line:
+        lines[i] = textwrap.indent(f'"{key2} "fffffffffff" \n', "  ")
+
+    elif key3 in line:
+        lines[i] = textwrap.indent(f'{key3} "{ckpt_path}" \n', "  ")
+    
+# Writes the modified lines back to the file
+with open(model_dir + "/pipeline.config", "w") as file:
+    file.writelines(lines)
