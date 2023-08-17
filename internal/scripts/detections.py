@@ -14,6 +14,7 @@ import pandas as pd
 import openpyxl
 import cv2 
 import numpy as np
+import re
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as viz_utils
@@ -24,36 +25,28 @@ from pathlib import Path
 
 
 
-def detect(self, labelmap_path, ):
+def detect(model_path, name_of_count, labelmap_path):
     cwd = (os.getcwd()).replace("\\", "/")
-    # my_ssd27_320_iou05_solos_only was the final model we used for evaluating the summer 2022 mussel results
-    CUSTOM_MODEL_NAME = 'my_ssd_resnet50_v1_fpn' # *** Enter here the name of the model you trained. ***
-    #CUSTOM_MODEL_NAME = 'my_ssd32'
-    TF_RECORD_SCRIPT_NAME = 'tfrecord_generation.py'
-    LABEL_MAP_NAME = 'label_map.pbtxt'
-    paths = {
-        'IMAGE_PATH': os.path.join('tensorflow', 'workspace','images'),
-        'MODEL_PATH': os.path.join('tensorflow', 'workspace','models'),
-        'PRETRAINED_MODEL_PATH': os.path.join('tensorflow', 'workspace','pre-trained-models'),
-        'CHECKPOINT_PATH': os.path.join('tensorflow', 'workspace','models',CUSTOM_MODEL_NAME), 
-        'OUTPUT_PATH': os.path.join('tensorflow', 'workspace','models',CUSTOM_MODEL_NAME, 'export'), 
-        'TFJS_PATH':os.path.join('tensorflow', 'workspace','models',CUSTOM_MODEL_NAME, 'tfjsexport'), 
-        'TFLITE_PATH':os.path.join('tensorflow', 'workspace','models',CUSTOM_MODEL_NAME, 'tfliteexport'), 
-        'PROTOC_PATH':os.path.join('tensorflow','protoc')
-    }
-    files = {
-        'PIPELINE_CONFIG':os.path.join('tensorflow', 'workspace','models', CUSTOM_MODEL_NAME, 'pipeline.config'),
-        'LABELMAP': labelmap_path
-    }
+    # Get a list of files in the folder
+    files = os.listdir(model_path)
+
+    # Extract numeric values from file names using regular expressions
+    ckpts = []
+    pattern = re.compile(r'\d+')
+    for file in files:
+        match = pattern.findall(file)
+        if match:
+            ckpts.append((int(match[0]), file))
+
+    # Find the file name with the highest number
+    max_number_ckpt = os.path.splitext(max(ckpt, key=lambda x: x[0])[1])[0]
 
     # Load pipeline config and build a detection model
-    configs = config_util.get_configs_from_pipeline_file(files['PIPELINE_CONFIG'])
+    configs = config_util.get_configs_from_pipeline_file(f"{model_path}/pipeline.config")
     detection_model = model_builder.build(model_config=configs['model'], is_training=False)
 
     ckpt = tf.compat.v2.train.Checkpoint(model=detection_model)
-    ckpt.restore(os.path.join(paths['CHECKPOINT_PATH'], 'ckpt-54.index')).expect_partial()
-
-
+    ckpt.restore(f"{model_path}/{max_number_ckpt}").expect_partial()
 
     # # Define the function "detect_fn" that you will be using
     @tf.function
@@ -62,8 +55,7 @@ def detect(self, labelmap_path, ):
         prediction_dict = detection_model.predict(image, shapes)
         detections = detection_model.postprocess(prediction_dict, shapes)
         return detections
-    category_index = label_map_util.create_category_index_from_labelmap(files['LABELMAP'])
-
+    category_index = label_map_util.create_category_index_from_labelmap(labelmap_path)
 
     # # Use the object detection function
 
@@ -85,16 +77,9 @@ def detect(self, labelmap_path, ):
 
     # For solo mussels only
 
-    Instance = '1'   # *** Input here the number of the folder that contains the images you will be analyzing. These keeps detection runs separated. ***
-                    # I like to call the folders "Instances." You should have already created this folder when you completed the Pre-detection... 
-                    # ... Split Image step to split the original images into 320x320 px tiles.
-
-    Instance_name = 'Instance %s' %(Instance) # Converts the instance name into a string.
-    DIR_PATH_NAME = os.path.join(paths['IMAGE_PATH'], Instance_name, 'tiles raw') # Generates the full FOLDER path name for the 'raw tiles' subfolder in ...
+    DIR_PATH_NAME = cwd + "/detections/" + name_of_count + "/images/segmentation" # Generates the full FOLDER path name for the 'raw tiles' subfolder in ...
                                                                                     # ... the instance folder.
-    DIR_PATH = Path(DIR_PATH_NAME).glob('*.png') # ***Set file type here (.png, .tiff, etc.). Generates the full IMAGE FILE path names.  Essentially defines ...
-                                                # ... the list of images to loop through during detection. &&&& But I don't think I need this line. Does it later.
-    DETECTED_PATH_NAME = os.path.join(paths['IMAGE_PATH'], Instance_name, 'tiles detected') # Defines the folder where the post-detection tiles will be saved
+    DETECTED_PATH_NAME = cwd + "/detections/" + name_of_count + "/images/segmentation" # Defines the folder where the post-detection tiles will be saved
     score_thresh = 0.05 # *** Enter here the confidence score, from 0 to 1, above which you will accept a detection. For our difficult-to-see mussels, we use 0.1.
 
     for sub_dir in os.walk(DIR_PATH_NAME): # Starts the loop that walks through across every coupon-specific folder in the "tiles raw" subfolder
@@ -103,7 +88,7 @@ def detect(self, labelmap_path, ):
         total_sum_array=[] # Initializes the array that will store the mussel totals for each COUPON (not tile).
         names_array = []   # Initializes the array that will store the coupon names (that will be linked to the mussel totals)
         for i in range(len(sub_dir[1])+1): # Starts the loop that walks through every tile in the coupon folders within the "tiles raw" subfolder 
-            DETECTED_COUPON_PATH_NAME = DETECTED_PATH_NAME + '\\' + sub_dir[1][i] # Defines the name of the coupon-specific folder that the detected tile images will go into.
+            DETECTED_COUPON_PATH_NAME = DETECTED_PATH_NAME + '/' + sub_dir[1][i] # Defines the name of the coupon-specific folder that the detected tile images will go into.
             if not os.path.exists(DETECTED_COUPON_PATH_NAME):
                 os.mkdir(DETECTED_COUPON_PATH_NAME)             # Creates the detected tile folder specific to this coupon in the "tiles detected" folder
             tile_count = np.array([0,0]) # Initializes the array that will contain the mussel count for a specific tile.
@@ -124,7 +109,6 @@ def detect(self, labelmap_path, ):
                 detections['detection_classes'] = detections['detection_classes'].astype(np.int64) # I don't understand
                 label_id_offset = 1 # I don't understand 
                 image_np_with_detections = image_np.copy() # I don't understand
-
 
                 # Collect the main outputs of the detection into easily callable arrays. We're just pulling specific chunks of information and giving them easier names.
                 # Detection_scores contains the confidence levels for each detection box. The boxes displayed in the detected image will be governed by the confidence threshold defined above ...
@@ -224,7 +208,6 @@ def detect(self, labelmap_path, ):
                         min_score_thresh=score_thresh,
                         agnostic_mode=False,
                         line_thickness=1,
-                        
                         )
             
                 # Save the mussel count for each tile after the name of each tile. This clump of code is important because it adds up the mussel counts!!! And if ...
@@ -238,7 +221,6 @@ def detect(self, labelmap_path, ):
                 
                 # Save the detected tile image
                 cv2.imwrite(os.path.join(DETECTED_COUPON_PATH_NAME,base_name0),image_np_with_detections) #saves the tile as an image in the tiles detected folder
-
             
             # Turn the mussel count for this tile into a dataframe so it can be saved as excel. This clump of code saves an excel file into each coupon folder;...
             # ... Each spreadsheet contains a list of the mussel counts for each individual tile. 
@@ -249,16 +231,13 @@ def detect(self, labelmap_path, ):
             total_sum = solos_sum # + light_clump_sum + heavy_clump_sum . This was originally for adding the clump counts, but we don't count clumps any more. This doesn't initialize the total_sum_array.
             total_sum_array.append(total_sum) # Stacks the total coupon sums into an array. I don't know why I didn't have to initialize the array first.
             # create excel writer object
-            excel_path = paths['IMAGE_PATH'] + '\\' + Instance_name + '\\tiles detected\\' + sub_dir[1][i] + '\\' + sub_dir[1][i] + '.xlsx' # Generates the path for writing the total coupon sums spreadsheet
+            excel_path = cwd + "/external/detections/" + name_of_count + "/spreadsheets/overall_counts.xlsx" # Generates the path for writing the total coupon sums spreadsheet
             writer = pd.ExcelWriter(excel_path)
             # write dataframe to excel
             df.to_excel(writer)
             # save the excel
             writer.save()  # Save the excel file.
             print('DataFrame is written successfully to Excel File.')
-            
-
-
 
     # Run this cell; it is in preparation for the next cell, which puts all the individual coupon counts into a single spreadsheet
 
@@ -269,18 +248,15 @@ def detect(self, labelmap_path, ):
 
     coupon_count = merge(names_array, total_sum_array)
 
-
-
     # Writes the total coupon sums spreadsheet.
-
     df_coupon_count = pd.DataFrame(coupon_count)
     df_coupon_count.columns = ['Coupon ID','Total'] 
     # df_name = df_name
     # create excel writer object
-    excel_path = paths['IMAGE_PATH'] + '\\' + Instance_name + '\\tiles detected\\' + 'coupon count' + '.xlsx'
+    excel_path = cwd + "/external/detections/" + name_of_count + "/spreadsheets/overall_counts.xlsx"
     writer = pd.ExcelWriter(excel_path)
     # write dataframe to excel
-    df_coupon_count.to_excel(writer)
+    df_coupon_count.to_excel(writer, sheet_name = "Segmentation", index = False)
     # save the excel
     writer.save()
     print('DataFrame is written successfully to Excel File.')

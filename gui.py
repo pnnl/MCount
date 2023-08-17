@@ -18,8 +18,9 @@ from subprocess import Popen
 
 import config as cfg
 import internal.scripts.tiling as tiling
-import internal.scripts.thresholding as thcc
-import internal.scripts.createSavableCountingDirectory as cscd
+import internal.scripts.detections as detections
+import internal.scripts.thresholding as thresholding
+import internal.scripts.directory as directory
 
 cwd = (os.getcwd()).replace("\\", "/")
 print (cwd)
@@ -141,7 +142,6 @@ class CountWindow(qtw.QWidget):
         self.file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(self.file_button)    
-        
 
         # Creates a view past counts button
         self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
@@ -154,6 +154,53 @@ class CountWindow(qtw.QWidget):
         self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.back_button.clicked.connect(self.back_button_clicked)
         self.layout().addWidget(self.back_button)
+
+    def file_button_clicked(self):
+        global image_dir
+
+        self.past_counts_button.setParent(None)
+
+        # Opens file explorer to choose images
+        image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
+        
+        # Checks if images were chosen
+        if image_dir != "":
+            # Removes file button and back button
+            self.file_button.setParent(None)
+            self.past_counts_button.setParent(None)
+            self.back_button.setParent(None)
+
+            # Creates a labelmap file dialog button
+            self.labelmap_button = qtw.QPushButton("Select labelmap from file explorer")
+            self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
+            self.layout().addWidget(self.labelmap_button)
+
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
+    
+    def labelmap_button_clicked(self):
+            self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
+            if self.labelmap:
+            # Removes labelmap button and back button
+                self.labelmap_button.setParent(None)
+                self.back_button.setParent(None)
+
+                # Creates checkboxes for thresholding and spreadsheet
+                self.thresh_button = qtw.QCheckBox("Run Thresholding")
+                self.thresh_button.setChecked(True)
+                self.layout().addWidget(self.thresh_button)
+                self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
+                self.sheet_button.setChecked(True)
+                self.layout().addWidget(self.sheet_button)
+
+                # Creates a run button
+                self.run_button = qtw.QPushButton("Run Model")
+                self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+                self.run_button.clicked.connect(self.run_button_clicked)
+                self.layout().addWidget(self.run_button)
+                # Adds the back button
+                self.layout().addWidget(self.back_button)
 
     def view_past(self):
         # Removes file button and back button
@@ -236,38 +283,6 @@ class CountWindow(qtw.QWidget):
         self.selection = self.model_dropdown.itemText(index) 
         return self.selected_model
     
-    
-    def file_button_clicked(self):
-        global image_dir
-
-        self.past_counts_button.setParent(None)
-
-        # Opens file explorer to choose images
-        image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
-        
-        # Checks if images were chosen
-        if image_dir != "":
-            # Removes file button and back button
-            self.file_button.setParent(None)
-            self.back_button.setParent(None)
-
-            # Creates checkboxes for thresholding and spreadsheet
-            self.thresh_button = qtw.QCheckBox("Run Thresholding")
-            self.thresh_button.setChecked(True)
-            self.layout().addWidget(self.thresh_button)
-            self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
-            self.sheet_button.setChecked(True)
-            self.layout().addWidget(self.sheet_button)
-
-            # Creates a run button
-            self.run_button = qtw.QPushButton("Run Model")
-            self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.run_button.clicked.connect(self.run_button_clicked)
-            self.layout().addWidget(self.run_button)
-
-            # Adds the back button
-            self.layout().addWidget(self.back_button)
-
     def back_button_clicked (self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
@@ -292,10 +307,9 @@ class CountWindow(qtw.QWidget):
         
         #print(name_of_the_count)
 
-
         if done:
             list_images = self.list_image(image_dir)
-            cscd.creatCountDirectorySaving(list_images[1], name_of_count)
+            directory.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
@@ -305,11 +319,15 @@ class CountWindow(qtw.QWidget):
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
 
-            #tiling.tile(list_images[0], f"{cwd}/external/detections")
+            tiling.tile(input_image_list=list_images[0], output_tiles_dir=f"{cwd}/external/detections/{name_of_count}/images/segmentation")
 
+            with open (f"{cwd}/internal/modeldict.json", "r") as f:
+                model_dict = json.load(f)
+            detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=self.labelmap)
+            
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thcc.threshFunction(image_dir, name_of_count, list_images[0])
+                thresholding.threshFunction(image_dir, name_of_count, list_images[0])
 
             self.title_label.setText("Detection Complete")
             self.back_button.setText("Home")
@@ -355,8 +373,6 @@ class CountWindow(qtw.QWidget):
             names.append(useThing)
 
         return [images, names]
-
-
 
 
 class TrainWindow (qtw.QWidget):
@@ -605,6 +621,3 @@ mw = MainWindow()
 
 # Runs the app 
 app.exec_()
-
-
-
