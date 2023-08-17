@@ -13,13 +13,13 @@ import ntpath
 import pandas as pd
 from pathlib import Path
 
-
 from subprocess import Popen
 
 import config as cfg
 import internal.scripts.tiling as tiling
-import internal.scripts.thresholding as thcc
-import internal.scripts.createSavableCountingDirectory as cscd
+import internal.scripts.thresholding as thresholding
+import internal.scripts.directory as directory
+import internal.scripts.detections as detections
 
 cwd = (os.getcwd()).replace("\\", "/")
 print (cwd)
