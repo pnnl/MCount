@@ -317,7 +317,7 @@ class CountWindow(qtw.QWidget):
             if (self.thresh_button.checkState()):
                 thcc.threshFunction(image_dir, name_of_count, list_images[0])
 
-            self.title_label.setText("Detection Complete")
+            self.title_label.setText("Detection\nComplete")
             self.back_button.setText("Home")
 
             # Creates an open pictures button
