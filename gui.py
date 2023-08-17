@@ -20,6 +20,7 @@ import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thcc
 import internal.scripts.createSavableCountingDirectory as cscd
+import internal.scripts.openLabelImg as oli
 
 cwd = (os.getcwd()).replace("\\", "/")
 print (cwd)
@@ -198,12 +199,17 @@ class CountWindow(qtw.QWidget):
         dirs.remove("placeholder")
         for item in dirs:
             self.model_dropdown.addItem(item)
-        
-        # Creates a next button
-        self.next_button = qtw.QPushButton("Next")
-        self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.next_button.clicked.connect(self.next_once_selected)
-        self.layout().addWidget(self.next_button)    
+           
+
+        if (len(dirs) > 0):
+            # Creates a next button
+            self.next_button = qtw.QPushButton("Next")
+            self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.next_button.clicked.connect(self.next_once_selected)
+            self.layout().addWidget(self.next_button)
+        else:
+            self.model_dropdown.addItem("No Previous Counts")
+
 
         self.layout().addWidget(self.back_button)
 
@@ -381,6 +387,12 @@ class TrainWindow (qtw.QWidget):
         self.xml_button.clicked.connect(self.xml_button_clicked)
         self.layout().addWidget(self.xml_button)
 
+        # Creates a open label img button
+        self.label_button = qtw.QPushButton("Open LabelImg")
+        self.label_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.label_button.clicked.connect(self.label_button_clicked)
+        self.layout().addWidget(self.label_button)
+
         # Creates a back button
         self.back_button = qtw.QPushButton("Cancel")
         self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -390,6 +402,9 @@ class TrainWindow (qtw.QWidget):
         # Shows window
         self.show()
     
+    def label_button_clicked(self):
+        oli.labelImageOpen()
+        
     def xml_button_clicked(self):
         # Opens file explorer to choose images
         self.xml_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Image Config Folder", cfg.initial_directory)
