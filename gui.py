@@ -18,9 +18,8 @@ from subprocess import Popen
 
 import config as cfg
 import internal.scripts.tiling as tiling
-import internal.scripts.detections as detections
-import internal.scripts.thresholding as thresholding
-import internal.scripts.directory as directory
+import internal.scripts.thresholding as thcc
+import internal.scripts.createSavableCountingDirectory as cscd
 
 cwd = (os.getcwd()).replace("\\", "/")
 print (cwd)
@@ -224,7 +223,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a past counts label 
-        self.model_label = qtw.QLabel(f"Past Counts:")
+        self.model_label = qtw.QLabel(f"Past Count:")
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
         self.model_label.setSizePolicy(size_policy)
         self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -245,22 +244,27 @@ class CountWindow(qtw.QWidget):
         dirs.remove("placeholder")
         for item in dirs:
             self.model_dropdown.addItem(item)
-        
-        # Creates a next button
-        self.next_button = qtw.QPushButton("Next")
-        self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.next_button.clicked.connect(self.next_once_selected)
-        self.layout().addWidget(self.next_button)    
+           
+
+        if (len(dirs) > 0):
+            # Creates a next button
+            self.next_button = qtw.QPushButton("Next")
+            self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.next_button.clicked.connect(self.next_once_selected)
+            self.layout().addWidget(self.next_button)
+        else:
+            self.model_dropdown.addItem("No Previous Counts")
+
 
         self.layout().addWidget(self.back_button)
 
     def next_once_selected(self, index):
-        self.title_label.setText("Count: " +  self.selection)
+        self.title_label.setText("Past Counts")
         self.back_button.setText("Home")
 
         self.next_button.setParent(None)
-        self.model_dropdown.setParent(None)
-        self.model_label.setParent(None)
+        #self.model_dropdown.setParent(None)
+        #self.model_label.setParent(None)
         
         # Creates an open pictures button
         self.open_pics = qtw.QPushButton("Open Detection Pictures")
@@ -329,7 +333,7 @@ class CountWindow(qtw.QWidget):
             if (self.thresh_button.checkState()):
                 thresholding.threshFunction(image_dir, name_of_count, list_images[0])
 
-            self.title_label.setText("Detection Complete")
+            self.title_label.setText("Detection\nComplete")
             self.back_button.setText("Home")
 
             # Creates an open pictures button
@@ -405,7 +409,7 @@ class TrainWindow (qtw.QWidget):
 
         # Shows window
         self.show()
-    
+        
     def xml_button_clicked(self):
         # Opens file explorer to choose images
         self.xml_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Image Config Folder", cfg.initial_directory)
