@@ -4,11 +4,15 @@ MCount is a GUI App built with PyQt5 that streamlines object detection. It utili
 ## Installation
 TODO
 
-## How to Use MCount
-You can minimize MCount anytime by clicking the - near the top right corner. 
+## How to Use MCoun
+You can minimize MCount anytime by clicking the - near the top right corner.
+ 
 The window cannot be enlarged to keep the formatting intact - MCount is meant to be a compact GUI app.
+
 You can close the app anytime by clicking the X in the top right corner.
-You can customize certain GUI elements (such as font or color) in the config.py file found in the same directory as MCount. 
+
+You can customize certain GUI elements (such as font or color) in the config.py file found in the same directory as MCount.
+ 
 The main menu displays MCount's five features as buttons: Count, Train Model, Select Model, Help, and Quit. 
 
 ### Count

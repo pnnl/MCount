@@ -25,7 +25,7 @@ from pathlib import Path
 # This defines the pathway for this algorith to look for whatever Instance folder you have defined above. My TFODCourse folder is inside
 # a folder called OD13 inside my user folder, but you may have placed yours somewhere else when you downloaded the github files and
 # activated the virtual environment.
-def tile(self, input_image_list, output_tiles_dir):
+def tile(input_image_list, output_tiles_dir):
     # Defines the starting and ending points of the tiling, and how big you want the tiles to be. You can overlap tiles by tuning the interval 
     # and step values. If you don't want the tiles to overlap but want to change the tile size, then change both the interval and the step.
     Ax = 0    # x axis where you want to start tiling; usually 0 
