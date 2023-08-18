@@ -9,7 +9,6 @@ import subprocess
 import time
 import textwrap
 import numpy as np
-import ntpath
 import pandas as pd
 from pathlib import Path
 
@@ -137,13 +136,13 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
-        self.file_button = qtw.QPushButton("Select images folder from file explorer")
-        self.file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.file_button.clicked.connect(self.file_button_clicked)
-        self.layout().addWidget(self.file_button)    
+        self.begin_button = qtw.QPushButton("Begin New Count")
+        self.begin_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.begin_button.clicked.connect(self.begin_button_clicked)
+        self.layout().addWidget(self.begin_button)     
 
         # Creates a view past counts button
-        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
+        self.past_counts_button = qtw.QPushButton("View past detection counts")
         self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.past_counts_button.clicked.connect(self.view_past)
         self.layout().addWidget(self.past_counts_button)    
@@ -154,23 +153,39 @@ class CountWindow(qtw.QWidget):
         self.back_button.clicked.connect(self.back_button_clicked)
         self.layout().addWidget(self.back_button)
 
+    def begin_button_clicked(self):
+        self.begin_button.setParent(None)
+        self.past_counts_button.setParent(None)
+        self.back_button.setParent(None)
+        
+        # Creates a file dialog button
+        self.file_button = qtw.QPushButton("Select Input Images Folder")
+        self.file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.file_button.clicked.connect(self.file_button_clicked)
+        self.layout().addWidget(self.file_button)
+
+        # Creates a back button
+        self.back_button = qtw.QPushButton("Cancel")
+        self.back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.back_button.clicked.connect(self.back_button_clicked)
+        self.layout().addWidget(self.back_button)
+
+
     def file_button_clicked(self):
         global image_dir
-
-        self.past_counts_button.setParent(None)
 
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
         
         # Checks if images were chosen
-        if image_dir != "":
+        if image_dir:
             # Removes file button and back button
             self.file_button.setParent(None)
             self.past_counts_button.setParent(None)
             self.back_button.setParent(None)
 
             # Creates a labelmap file dialog button
-            self.labelmap_button = qtw.QPushButton("Select labelmap from file explorer")
+            self.labelmap_button = qtw.QPushButton("Select Labelmap")
             self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
             self.layout().addWidget(self.labelmap_button)
@@ -260,7 +275,7 @@ class CountWindow(qtw.QWidget):
 
     def next_once_selected(self, index):
         self.title_label.setText("Past Counts")
-        self.back_button.setText("Home")
+        self.back_button.setText("Main Menu")
 
         self.next_button.setParent(None)
         #self.model_dropdown.setParent(None)
@@ -325,7 +340,7 @@ class CountWindow(qtw.QWidget):
 
             tiling.tile(input_image_list=list_images[0], output_tiles_dir=f"{cwd}/external/detections/{name_of_count}/images/segmentation")
 
-            with open (f"{cwd}/internal/modeldict.json", "r") as f:
+            with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
             detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=self.labelmap)
             
@@ -334,7 +349,7 @@ class CountWindow(qtw.QWidget):
                 thresholding.threshFunction(image_dir, name_of_count, list_images[0])
 
             self.title_label.setText("Detection\nComplete")
-            self.back_button.setText("Home")
+            self.back_button.setText("Main Menu")
 
             # Creates an open pictures button
             self.open_pics = qtw.QPushButton("Open Detection Pictures")
@@ -396,7 +411,7 @@ class TrainWindow (qtw.QWidget):
         self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
-        self.xml_button = qtw.QPushButton("Select image configs from file explorer")
+        self.xml_button = qtw.QPushButton("Select Image Configs (.xml)")
         self.xml_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.xml_button.clicked.connect(self.xml_button_clicked)
         self.layout().addWidget(self.xml_button)
@@ -418,7 +433,7 @@ class TrainWindow (qtw.QWidget):
         if self.xml_dir:
             self.xml_button.setParent(None)
             self.back_button.setParent(None)
-            self.labelmap_button = qtw.QPushButton("Select labelmap from file explorer")
+            self.labelmap_button = qtw.QPushButton("Select Labelmap (.pbtxt)")
             self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
             self.layout().addWidget(self.labelmap_button)
@@ -543,7 +558,7 @@ class SelectWindow (qtw.QWidget):
                 self.model_dropdown.addItem(item)
         
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Add model folder from file explorer")
+        file_button = qtw.QPushButton("Add Model Folder")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         file_button.setSizePolicy(size_policy)

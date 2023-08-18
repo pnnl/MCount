@@ -39,7 +39,7 @@ def detect(model_path, name_of_count, labelmap_path):
             ckpts.append((int(match[0]), file))
 
     # Find the file name with the highest number
-    max_number_ckpt = os.path.splitext(max(ckpt, key=lambda x: x[0])[1])[0]
+    max_number_ckpt = os.path.splitext(max(ckpts, key=lambda x: x[0])[1])[0]
 
     # Load pipeline config and build a detection model
     configs = config_util.get_configs_from_pipeline_file(f"{model_path}/pipeline.config")
