@@ -16,7 +16,16 @@ from PIL import Image, ImageEnhance
 from pathlib import Path
 
 
-def threshFunction (image_dir_counting, countName, imagess):
+def threshFunction (image_dir_counting, countName, imagess,
+                    image1_buttontest,
+                    image2_buttontest,
+                    image3_buttontest,
+                    image4_buttontest,
+                    image5_buttontest,
+                    image6_buttontest,
+                    image7_buttontest,
+                    image8_buttontest,
+                    image9_buttontest):
     # -*- coding: utf-8 -*-
     """
     Created on Wed Jul 28 07:07:59 2023
@@ -49,7 +58,7 @@ def threshFunction (image_dir_counting, countName, imagess):
 
     locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
 
-    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_mussel_counts.xlsx', mode="a", engine='openpyxl')
+    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
 
     fileNameAry = []
     musselCountAry = []
@@ -143,21 +152,28 @@ def threshFunction (image_dir_counting, countName, imagess):
         except:
             print("skiped")
         #os.replace(ntpath.abspath(place))
-
         cv2.imwrite((place+"/1_og.jpg"), img)
-        cv2.imwrite((place+"/2_redImage.jpg"), redImage)
-        cv2.imwrite((place+"/3_gray.jpg"), gray)
-        cv2.imwrite((place+"/4_blured.jpg"), blured)
-        cv2.imwrite((place+"/6_thresh.jpg"), tempppp)
-        cv2.imwrite((place+"/extra_theImgTestAltThresh.jpg"), theImgTestAltThresh)
-        cv2.imwrite((place+"/7_closing.jpg"), closing)
-        cv2.imwrite((place+"/8_negative.jpg"), negative)
-        cv2.imwrite((place+"/notUsed_closing2.jpg"), closing2)
-        cv2.imwrite((place+"/notUsed_regular.jpg"), regular)
-        cv2.imwrite((place+"/9_myFinalUse.jpg"), myFinalUse)
+        if (image2_buttontest):
+            cv2.imwrite((place+"/2_redImage.jpg"), redImage)
+        if (image3_buttontest):
+            cv2.imwrite((place+"/3_gray.jpg"), gray)
+        if (image4_buttontest):
+            cv2.imwrite((place+"/4_blured.jpg"), blured)
+        if (image5_buttontest):
+            cv2.imwrite((place+"/5_thresh.jpg"), tempppp)
+        if (image6_buttontest):
+            cv2.imwrite((place+"/6_closing.jpg"), closing)
+        cv2.imwrite((place+"/7_myFinalUse.jpg"), myFinalUse)
+        if (image8_buttontest):
+            cv2.imwrite((place+"/extra_theImgTestAltThresh.jpg"), theImgTestAltThresh)
+        if (image9_buttontest):
+            cv2.imwrite((place+"/notUsed_closing2.jpg"), closing2)
+            cv2.imwrite((place+"/notUsed_regular.jpg"), regular)
+            cv2.imwrite((place+"/notUsed7_negative.jpg"), negative)
+
         
         
-        trans = Image.open(place+"/9_myFinalUse.jpg")
+        trans = Image.open(place+"/7_myFinalUse.jpg")
         trans.putalpha(75)
         
         layOver = Image.open(place+"/1_og.jpg")
@@ -168,9 +184,12 @@ def threshFunction (image_dir_counting, countName, imagess):
         
         #layOver.show()
         
-        layOver = layOver.save(place+"/12_layOver.jpg")
+        layOver = layOver.save(place+"/8_layOver.jpg")
 
-        
+        if (not image1_buttontest):
+            os.remove((place+"/1_og.jpg"))
+        if (not image7_buttontest):
+            os.remove((place+"/7_myFinalUse.jpg"))
         
         number_of_white_pix = cv2.countNonZero(myFinalUse)
         number_of_black_pix = np.sum(myFinalUse == 0)
