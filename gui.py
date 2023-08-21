@@ -142,7 +142,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.begin_button)     
 
         # Creates a view past counts button
-        self.past_counts_button = qtw.QPushButton("View past detection counts")
+        self.past_counts_button = qtw.QPushButton("View Past Detection Counts")
         self.past_counts_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.past_counts_button.clicked.connect(self.view_past)
         self.layout().addWidget(self.past_counts_button)    
@@ -157,6 +157,9 @@ class CountWindow(qtw.QWidget):
         self.begin_button.setParent(None)
         self.past_counts_button.setParent(None)
         self.back_button.setParent(None)
+
+        # Changes title text
+        self.title_label.setText("New Count")
         
         # Creates a file dialog button
         self.file_button = qtw.QPushButton("Select Input Images Folder")
@@ -176,16 +179,34 @@ class CountWindow(qtw.QWidget):
 
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
+
+        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+            current_model_name = model_dict[model_dict["current_model_directory"]]
+        
+        if image_dir and current_model_name == "MCount Mussel Detector":
+            # Bypasses the labelmap file dialog
+            global labelmap_bypass
+            labelmap_bypass = True
+            self.default_labelmap = cwd + "/internal/model/annotations/labelmap.pbtxt"
+            self.labelmap = self.default_labelmap
+            
+            # Does formatting stuff
+            self.file_button.setParent(None)
+            self.labelmap_button = qtw.QPushButton("Placeholder")
+
+            # Continues as if labelmap button was pressed
+            self.labelmap_button_clicked()
+
         
         # Checks if images were chosen
-        if image_dir:
+        elif image_dir:
             # Removes file button and back button
             self.file_button.setParent(None)
-            self.past_counts_button.setParent(None)
             self.back_button.setParent(None)
 
             # Creates a labelmap file dialog button
-            self.labelmap_button = qtw.QPushButton("Select Labelmap")
+            self.labelmap_button = qtw.QPushButton("Select Labelmap (.pbtxt)")
             self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
             self.layout().addWidget(self.labelmap_button)
@@ -194,9 +215,10 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.back_button)
     
     def labelmap_button_clicked(self):
-            self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-            if self.labelmap:
-            # Removes labelmap button and back button
+            if labelmap_bypass == False:
+                self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
+            if self.labelmap or labelmap_bypass == True:
+                # Does formatting stuff
                 self.labelmap_button.setParent(None)
                 self.back_button.setParent(None)
 
@@ -213,13 +235,14 @@ class CountWindow(qtw.QWidget):
                 self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
                 self.run_button.clicked.connect(self.run_button_clicked)
                 self.layout().addWidget(self.run_button)
+                
                 # Adds the back button
                 self.layout().addWidget(self.back_button)
 
     def view_past(self):
         # Removes file button and back button
         self.title_label.setParent(None)
-        self.file_button.setParent(None)
+        self.begin_button.setParent(None)
         self.past_counts_button.setParent(None)
 
         self.selection = ""
@@ -366,7 +389,6 @@ class CountWindow(qtw.QWidget):
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
-
     
     def list_image (self, image_dir_counting):
         images = []
@@ -503,7 +525,6 @@ class TrainWindow (qtw.QWidget):
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
-
 
 class SelectWindow (qtw.QWidget): 
     def __init__(self):

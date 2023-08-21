@@ -85,7 +85,7 @@ def detect(model_path, name_of_count, labelmap_path):
     for sub_dir in os.walk(DIR_PATH_NAME): # Starts the loop that walks through across every coupon-specific folder in the "tiles raw" subfolder
     # for folder in sub_dir:
     #     chdir(folder)
-        total_sum_array=[] # Initializes the array that will store the mussel totals for each COUPON (not tile).
+        total_sum_array = [] # Initializes the array that will store the mussel totals for each COUPON (not tile).
         names_array = []   # Initializes the array that will store the coupon names (that will be linked to the mussel totals)
         for i in range(len(sub_dir[1])+1): # Starts the loop that walks through every tile in the coupon folders within the "tiles raw" subfolder 
             DETECTED_COUPON_PATH_NAME = DETECTED_PATH_NAME + '/' + sub_dir[1][i] # Defines the name of the coupon-specific folder that the detected tile images will go into.

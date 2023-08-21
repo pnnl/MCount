@@ -14,8 +14,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QCo
 import textwrap
 import os
 import re
+import cv2
 from pathlib import Path
 
-cwd = (os.getcwd()).replace("\\", "/")
+pully = None
 
-model_path = cwd + "/internal/model"
+if not pully:
+    print("if not")
+else:
+    print("else")
