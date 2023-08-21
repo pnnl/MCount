@@ -18,7 +18,7 @@ import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
 import internal.scripts.directory as directory
-import internal.scripts.detections as detections
+#import internal.scripts.detections as detections
 
 cwd = (os.getcwd()).replace("\\", "/")
 print (cwd)
@@ -228,16 +228,67 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.thresh_button)
             self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
             self.sheet_button.setChecked(True)
-            self.layout().addWidget(self.sheet_button)
+            #self.layout().addWidget(self.sheet_button)
+
+            # Creates a run button
+            self.next_button = qtw.QPushButton("Next")
+            self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.next_button.clicked.connect(self.select_images)
+            self.layout().addWidget(self.next_button)
+            
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
+
+    def select_images(self):
+        if (self.thresh_button.checkState()):
+            self.thresh_button.setParent(None)
+            self.next_button.setParent(None)
 
             # Creates a run button
             self.run_button = qtw.QPushButton("Run Model")
             self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.run_button.clicked.connect(self.run_button_clicked)
             self.layout().addWidget(self.run_button)
-            
-            # Adds the back button
             self.layout().addWidget(self.back_button)
+
+            self.title_label.setText("Select Images\nTo Save")
+            
+            # Creates checkboxes for saving images
+            self.image1_buttontest = qtw.QCheckBox("#1 Original")
+            self.image1_buttontest.setChecked(True)
+            self.layout().addWidget(self.image1_buttontest)
+
+            self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
+            self.image2_buttontest.setChecked(False)
+            self.layout().addWidget(self.image2_buttontest)
+
+            self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
+            self.image3_buttontest.setChecked(False)
+            self.layout().addWidget(self.image3_buttontest)
+
+            self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
+            self.image4_buttontest.setChecked(False)
+            self.layout().addWidget(self.image4_buttontest)
+
+            self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
+            self.image5_buttontest.setChecked(True)
+            self.layout().addWidget(self.image5_buttontest)
+
+            self.image6_buttontest = qtw.QCheckBox("#6 Closing")
+            self.image6_buttontest.setChecked(False)
+            self.layout().addWidget(self.image6_buttontest)
+
+            self.image7_buttontest = qtw.QCheckBox("#7 Lay Over")
+            self.image7_buttontest.setChecked(True)
+            self.layout().addWidget(self.image7_buttontest)
+
+            self.image8_buttontest = qtw.QCheckBox("#8 Extra")
+            self.image8_buttontest.setChecked(False)
+            self.layout().addWidget(self.image8_buttontest)
+
+            self.image9_buttontest = qtw.QCheckBox("#9 Unused")
+            self.image9_buttontest.setChecked(False)
+            self.layout().addWidget(self.image9_buttontest)
 
     def view_past(self):
         # Removes file button and back button
@@ -365,11 +416,20 @@ class CountWindow(qtw.QWidget):
 
             with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
-            detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=self.labelmap)
+            #detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=self.labelmap)
             
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thresholding.threshFunction(image_dir, name_of_count, list_images[0])
+                thresholding.threshFunction(image_dir, name_of_count, list_images[0],
+                                            self.image1_buttontest,
+                                            self.image2_buttontest,
+                                            self.image3_buttontest,
+                                            self.image4_buttontest,
+                                            self.image5_buttontest,
+                                            self.image6_buttontest,
+                                            self.image7_buttontest,
+                                            self.image8_buttontest,
+                                            self.image9_buttontest)
 
             self.title_label.setText("Detection\nComplete")
             self.back_button.setText("Main Menu")
@@ -525,6 +585,7 @@ class TrainWindow (qtw.QWidget):
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
+
 
 class SelectWindow (qtw.QWidget): 
     def __init__(self):
