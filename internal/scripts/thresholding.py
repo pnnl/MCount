@@ -152,8 +152,7 @@ def threshFunction (image_dir_counting, countName, imagess,
         except:
             print("skiped")
         #os.replace(ntpath.abspath(place))
-        if (image1_buttontest):
-            cv2.imwrite((place+"/1_og.jpg"), img)
+        cv2.imwrite((place+"/1_og.jpg"), img)
         if (image2_buttontest):
             cv2.imwrite((place+"/2_redImage.jpg"), redImage)
         if (image3_buttontest):
@@ -164,8 +163,7 @@ def threshFunction (image_dir_counting, countName, imagess,
             cv2.imwrite((place+"/5_thresh.jpg"), tempppp)
         if (image6_buttontest):
             cv2.imwrite((place+"/6_closing.jpg"), closing)
-        if (image7_buttontest):
-            cv2.imwrite((place+"/7_myFinalUse.jpg"), myFinalUse)
+        cv2.imwrite((place+"/7_myFinalUse.jpg"), myFinalUse)
         if (image8_buttontest):
             cv2.imwrite((place+"/extra_theImgTestAltThresh.jpg"), theImgTestAltThresh)
         if (image9_buttontest):
@@ -186,9 +184,12 @@ def threshFunction (image_dir_counting, countName, imagess,
         
         #layOver.show()
         
-        layOver = layOver.save(place+"/12_layOver.jpg")
+        layOver = layOver.save(place+"/8_layOver.jpg")
 
-        
+        if (not image1_buttontest):
+            os.remove((place+"/1_og.jpg"))
+        if (not image7_buttontest):
+            os.remove((place+"/7_myFinalUse.jpg"))
         
         number_of_white_pix = cv2.countNonZero(myFinalUse)
         number_of_black_pix = np.sum(myFinalUse == 0)

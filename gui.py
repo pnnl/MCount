@@ -226,9 +226,9 @@ class CountWindow(qtw.QWidget):
             self.thresh_button = qtw.QCheckBox("Run Thresholding")
             self.thresh_button.setChecked(True)
             self.layout().addWidget(self.thresh_button)
-            self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
-            self.sheet_button.setChecked(True)
-            #self.layout().addWidget(self.sheet_button)
+            self.selection_wanted_button = qtw.QCheckBox("Download Specific\nThresholding Images")
+            self.selection_wanted_button.setChecked(True)
+            self.layout().addWidget(self.selection_wanted_button)
 
             # Creates a run button
             self.next_button = qtw.QPushButton("Next")
@@ -240,8 +240,9 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.back_button)
 
     def select_images(self):
-        if (self.thresh_button.checkState()):
+        if (self.thresh_button.checkState() and self.selection_wanted_button.checkState()):
             self.thresh_button.setParent(None)
+            self.selection_wanted_button.setParent(None)
             self.next_button.setParent(None)
 
             self.title_label.setText("Select Images\nTo Save")
@@ -290,7 +291,7 @@ class CountWindow(qtw.QWidget):
             self.image6_buttontest.setChecked(False)
             self.menu_split1.addWidget(self.image6_buttontest)
 
-            self.image7_buttontest = qtw.QCheckBox("#7 Lay Over")
+            self.image7_buttontest = qtw.QCheckBox("#7 Final")
             self.image7_buttontest.setChecked(True)
             self.menu_split2.addWidget(self.image7_buttontest)
 
@@ -305,11 +306,49 @@ class CountWindow(qtw.QWidget):
             # Creates a run button
             self.run_button = qtw.QPushButton("Run Model")
             self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.run_button.clicked.connect(self.run_button_clicked)
+            self.run_button.clicked.connect(self.get_rid_of_checkboxes)
             self.layout().addWidget(self.run_button)
 
             #fixes location of start button
             self.layout().addWidget(self.back_button)
+        else:
+            # Changes title text
+            self.title_label.setText("Count in Progress ...")
+            
+            # Removes widgets from the layout
+            self.thresh_button.setParent(None)
+            self.selection_wanted_button.setParent(None)
+            self.back_button.setParent(None)
+            self.next_button.setParent(None)
+
+            self.run_button_clicked()
+
+    def get_rid_of_checkboxes(self):
+        self.menu_split1.setParent(None)
+        self.menu_split2.setParent(None)
+        self.menu_split3.setParent(None)
+        self.menu_split4.setParent(None)
+        self.menu_split5.setParent(None)
+
+        self.image1_buttontest.setParent(None)
+        self.image2_buttontest.setParent(None)
+        self.image3_buttontest.setParent(None)
+        self.image4_buttontest.setParent(None)
+        self.image5_buttontest.setParent(None)
+        self.image6_buttontest.setParent(None)
+        self.image7_buttontest.setParent(None)
+        self.image8_buttontest.setParent(None)
+        self.image9_buttontest.setParent(None)
+
+        self.run_button.setParent(None)
+
+        self.back_button.setParent(None)
+
+        # Changes title text
+        self.title_label.setText("Count in Progress ...")
+
+        #run the actualy counting stuff
+        self.run_button_clicked()
 
     def view_past(self):
         # Removes file button and back button
@@ -348,7 +387,7 @@ class CountWindow(qtw.QWidget):
         self.model_dropdown.setSizePolicy(size_policy)
         self.dropdown_layout.addWidget(self.model_dropdown)
 
-        # Pulls models from modeldict.json and adds them to the dropdown
+        # adds to the dropdown
         directory = cwd + "/external/detections"
         dirs = os.listdir(directory)
         dirs.remove("placeholder")
@@ -413,11 +452,21 @@ class CountWindow(qtw.QWidget):
         os.startfile(paths)
 
     def run_button_clicked(self):
+
+        # Pulls models from unamedNumber.json and adds them to the dropdown
+        with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
+            model_dict = json.load(json_File)
+            value_list = list(model_dict.values())
+        value = value_list[0]
+            
         #name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
-        name_of_count = "Unamed"
+        name_of_count = f"Unamed {value}"
         if name and done:
             name_of_count = name
+        else:
+            with open(f"{cwd}/internal/resources/unamedNumber.json", "w") as jsonFile:
+                json.dump({"values": value+1}, jsonFile)
         
         #print(name_of_the_count)
 
@@ -426,9 +475,8 @@ class CountWindow(qtw.QWidget):
             directory.creatCountDirectorySaving(list_images[1], name_of_count)
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
-            self.sheet_button.setParent(None)
             self.back_button.setParent(None)
-            self.run_button.setParent(None)
+            self.next_button.setParent(None)
             # Changes title text
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
@@ -441,16 +489,29 @@ class CountWindow(qtw.QWidget):
             
             # if thresh button is checked run the file
             if (self.thresh_button.checkState()):
-                thresholding.threshFunction(image_dir, name_of_count, list_images[0],
-                                            self.image1_buttontest,
-                                            self.image2_buttontest,
-                                            self.image3_buttontest,
-                                            self.image4_buttontest,
-                                            self.image5_buttontest,
-                                            self.image6_buttontest,
-                                            self.image7_buttontest,
-                                            self.image8_buttontest,
-                                            self.image9_buttontest)
+                try:
+                    thresholding.threshFunction(image_dir, name_of_count, list_images[0],
+                                                self.image1_buttontest.checkState(),
+                                                self.image2_buttontest.checkState(),
+                                                self.image3_buttontest.checkState(),
+                                                self.image4_buttontest.checkState(),
+                                                self.image5_buttontest.checkState(),
+                                                self.image6_buttontest.checkState(),
+                                                self.image7_buttontest.checkState(),
+                                                self.image8_buttontest.checkState(),
+                                                self.image9_buttontest.checkState())
+                except:
+                    thresholding.threshFunction(image_dir, name_of_count, list_images[0],
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,)
+
 
             self.title_label.setText("Detection\nComplete")
             self.back_button.setText("Main Menu")
