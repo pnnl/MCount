@@ -37,14 +37,14 @@ def tile(input_image_list, output_tiles_dir):
     Iy = 310   # y axis interval
     Iys = 310 # y axis loop step
 
-    for pic in input_image_list: #Loop through the photos
+    for pic in input_image_list: # Loop through the photos
         name = str(pic) 
         base_name = os.path.basename(name) # Gets rid of the folder path part of the coupon file name.
         name_only = os.path.splitext(base_name)[0] # Gets rid of the .png part of the coupon file name.
         folder_path = os.path.join(output_tiles_dir, name_only) # Creates the full folder path name for the individual coupon name at this step in the loop.
         if not os.path.exists(folder_path):
             os.mkdir(folder_path) # Creates the folder
-        im = cv2.imread(name) #Read the coupon image 
+        im = cv2.imread(name) # Read the coupon image 
         for x in range(Ax,Bx,Ixs):  # sets range for tiling, as defined above, in the x axis
             for y in range(Ay,By,Iys):  # sets range for tiling, as defined above, in the y axis
                 tile_coord = '%04d %04d ' % (x,y) # converts the tile coordinates to a string so it can be used in the file name

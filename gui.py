@@ -21,7 +21,6 @@ import internal.scripts.directory as directory
 import internal.scripts.detections as detections
 
 cwd = (os.getcwd()).replace("\\", "/")
-print (cwd)
 
 def defaultUI(window):
     # Adds a title 
@@ -215,6 +214,7 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.back_button)
     
     def labelmap_button_clicked(self):
+        # Checks for labelmap_bypass
         if labelmap_bypass == False:
             self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
         if self.labelmap or labelmap_bypass == True:
@@ -341,37 +341,39 @@ class CountWindow(qtw.QWidget):
         os.startfile(paths)
 
     def run_button_clicked(self):
-        #name the count
+        # Opens an input dialog to name the count
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         name_of_count = "Unamed"
         if name and done:
             name_of_count = name
-        
-        #print(name_of_the_count)
 
         if done:
             list_images = self.list_image(image_dir)
             directory.creatCountDirectorySaving(list_images[1], name_of_count)
+            
             # Removes widgets from the layout
             self.thresh_button.setParent(None)
             self.sheet_button.setParent(None)
             self.back_button.setParent(None)
             self.run_button.setParent(None)
+            
             # Changes title text
             self.title_label.setText("Count in Progress ...")
             self.layout().addWidget(self.back_button)
-
+            
+            # Breaks images into tiles
             tiling.tile(input_image_list=list_images[0], output_tiles_dir=f"{cwd}/external/detections/{name_of_count}/images/segmentation")
 
+            # Runs detections
             with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
                 model_dict = json.load(f)
             detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=self.labelmap)
             
-            # if thresh button is checked run the file
-            if (self.thresh_button.checkState()):
+            # If thresh button is checked run the file
+            if self.thresh_button.checkState():
                 thresholding.threshFunction(image_dir, name_of_count, list_images[0])
 
-            self.title_label.setText("Detection\nComplete")
+            self.title_label.setText("Detection\n Complete")
             self.back_button.setText("Main Menu")
 
             # Creates an open pictures button
@@ -406,9 +408,6 @@ class CountWindow(qtw.QWidget):
         names = []
         
         for i in images:
-            #temp = ntpath.abspath(i)
-            #thingImage = temp.split("\\")
-            #useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
             useThing = os.path.basename(i)
             
             names.append(useThing)
