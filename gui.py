@@ -244,51 +244,72 @@ class CountWindow(qtw.QWidget):
             self.thresh_button.setParent(None)
             self.next_button.setParent(None)
 
+            self.title_label.setText("Select Images\nTo Save")
+
+            
+            # Creates help/quit button split at bottom
+            self.menu_split1 = qtw.QHBoxLayout()
+            self.menu_split1.setSpacing(10)
+            self.layout().addLayout(self.menu_split1)
+            self.menu_split2 = qtw.QHBoxLayout()
+            self.menu_split2.setSpacing(10)
+            self.layout().addLayout(self.menu_split2)
+            self.menu_split3 = qtw.QHBoxLayout()
+            self.menu_split3.setSpacing(10)
+            self.layout().addLayout(self.menu_split3)
+            self.menu_split4 = qtw.QHBoxLayout()
+            self.menu_split4.setSpacing(10)
+            self.layout().addLayout(self.menu_split4)
+            self.menu_split5 = qtw.QHBoxLayout()
+            self.menu_split5.setSpacing(10)
+            self.layout().addLayout(self.menu_split5)
+
+            
+            # Creates checkboxes for saving images
+            self.image1_buttontest = qtw.QCheckBox("#1 Original")
+            self.image1_buttontest.setChecked(True)
+            self.menu_split1.addWidget(self.image1_buttontest)
+
+            self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
+            self.image2_buttontest.setChecked(False)
+            self.menu_split2.addWidget(self.image2_buttontest)
+
+            self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
+            self.image3_buttontest.setChecked(False)
+            self.menu_split3.addWidget(self.image3_buttontest)
+
+            self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
+            self.image4_buttontest.setChecked(False)
+            self.menu_split4.addWidget(self.image4_buttontest)
+
+            self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
+            self.image5_buttontest.setChecked(True)
+            self.menu_split5.addWidget(self.image5_buttontest)
+
+            self.image6_buttontest = qtw.QCheckBox("#6 Closing")
+            self.image6_buttontest.setChecked(False)
+            self.menu_split1.addWidget(self.image6_buttontest)
+
+            self.image7_buttontest = qtw.QCheckBox("#7 Lay Over")
+            self.image7_buttontest.setChecked(True)
+            self.menu_split2.addWidget(self.image7_buttontest)
+
+            self.image8_buttontest = qtw.QCheckBox("#8 Extra")
+            self.image8_buttontest.setChecked(False)
+            self.menu_split3.addWidget(self.image8_buttontest)
+
+            self.image9_buttontest = qtw.QCheckBox("#9 Unused")
+            self.image9_buttontest.setChecked(False)
+            self.menu_split4.addWidget(self.image9_buttontest)
+
             # Creates a run button
             self.run_button = qtw.QPushButton("Run Model")
             self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.run_button.clicked.connect(self.run_button_clicked)
             self.layout().addWidget(self.run_button)
+
+            #fixes location of start button
             self.layout().addWidget(self.back_button)
-
-            self.title_label.setText("Select Images\nTo Save")
-            
-            # Creates checkboxes for saving images
-            self.image1_buttontest = qtw.QCheckBox("#1 Original")
-            self.image1_buttontest.setChecked(True)
-            self.layout().addWidget(self.image1_buttontest)
-
-            self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
-            self.image2_buttontest.setChecked(False)
-            self.layout().addWidget(self.image2_buttontest)
-
-            self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
-            self.image3_buttontest.setChecked(False)
-            self.layout().addWidget(self.image3_buttontest)
-
-            self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
-            self.image4_buttontest.setChecked(False)
-            self.layout().addWidget(self.image4_buttontest)
-
-            self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
-            self.image5_buttontest.setChecked(True)
-            self.layout().addWidget(self.image5_buttontest)
-
-            self.image6_buttontest = qtw.QCheckBox("#6 Closing")
-            self.image6_buttontest.setChecked(False)
-            self.layout().addWidget(self.image6_buttontest)
-
-            self.image7_buttontest = qtw.QCheckBox("#7 Lay Over")
-            self.image7_buttontest.setChecked(True)
-            self.layout().addWidget(self.image7_buttontest)
-
-            self.image8_buttontest = qtw.QCheckBox("#8 Extra")
-            self.image8_buttontest.setChecked(False)
-            self.layout().addWidget(self.image8_buttontest)
-
-            self.image9_buttontest = qtw.QCheckBox("#9 Unused")
-            self.image9_buttontest.setChecked(False)
-            self.layout().addWidget(self.image9_buttontest)
 
     def view_past(self):
         # Removes file button and back button

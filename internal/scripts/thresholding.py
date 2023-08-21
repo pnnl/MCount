@@ -58,7 +58,7 @@ def threshFunction (image_dir_counting, countName, imagess,
 
     locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
 
-    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_mussel_counts.xlsx', mode="a", engine='openpyxl')
+    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
 
     fileNameAry = []
     musselCountAry = []
