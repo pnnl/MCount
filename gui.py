@@ -215,29 +215,29 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.back_button)
     
     def labelmap_button_clicked(self):
-            if labelmap_bypass == False:
-                self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-            if self.labelmap or labelmap_bypass == True:
-                # Does formatting stuff
-                self.labelmap_button.setParent(None)
-                self.back_button.setParent(None)
+        if labelmap_bypass == False:
+            self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
+        if self.labelmap or labelmap_bypass == True:
+            # Does formatting stuff
+            self.labelmap_button.setParent(None)
+            self.back_button.setParent(None)
 
-                # Creates checkboxes for thresholding and spreadsheet
-                self.thresh_button = qtw.QCheckBox("Run Thresholding")
-                self.thresh_button.setChecked(True)
-                self.layout().addWidget(self.thresh_button)
-                self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
-                self.sheet_button.setChecked(True)
-                self.layout().addWidget(self.sheet_button)
+            # Creates checkboxes for thresholding and spreadsheet
+            self.thresh_button = qtw.QCheckBox("Run Thresholding")
+            self.thresh_button.setChecked(True)
+            self.layout().addWidget(self.thresh_button)
+            self.sheet_button = qtw.QCheckBox("Create Excel Spreadsheet with Counts")
+            self.sheet_button.setChecked(True)
+            self.layout().addWidget(self.sheet_button)
 
-                # Creates a run button
-                self.run_button = qtw.QPushButton("Run Model")
-                self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-                self.run_button.clicked.connect(self.run_button_clicked)
-                self.layout().addWidget(self.run_button)
-                
-                # Adds the back button
-                self.layout().addWidget(self.back_button)
+            # Creates a run button
+            self.run_button = qtw.QPushButton("Run Model")
+            self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.run_button.clicked.connect(self.run_button_clicked)
+            self.layout().addWidget(self.run_button)
+            
+            # Adds the back button
+            self.layout().addWidget(self.back_button)
 
     def view_past(self):
         # Removes file button and back button
