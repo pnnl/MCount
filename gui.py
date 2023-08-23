@@ -22,6 +22,10 @@ import internal.scripts.detections as detections
 
 cwd = (os.getcwd()).replace("\\", "/")
 
+os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
+os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+os.environ["QT_SCALE_FACTOR"]             = "1"
+
 def defaultUI(window):
     # Adds a title 
     window.setWindowTitle("MCount")
@@ -34,8 +38,12 @@ def defaultUI(window):
     window.layout().setSpacing(12)
     
     # Creates window at specific size
-    window.setMinimumSize(500, 325)
-    window.setMaximumSize(501, 326)
+    if cfg.small_screen:
+        window.setMinimumSize(600, 425)
+        window.setMaximumSize(601, 426)
+    else:
+        window.setMinimumSize(550, 375)
+        window.setMaximumSize(551, 376)
 
 
 class MainWindow(qtw.QWidget):
@@ -50,16 +58,18 @@ class MainWindow(qtw.QWidget):
 
         # Create title and author labels within vertical layout
         self.title_label = qtw.QLabel("MCount")
-        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.title_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.title_color}; font-weight: bold;')
         self.title_label.setAlignment(qtc.Qt.AlignCenter)
-        self.title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding)
         self.layout().addWidget(self.title_label)
         author_label = qtw.QLabel("By Lance Miller and Navaj Nune")
-        author_label.setFont(qtg.QFont(cfg.default_font, 9))
+        author_label.setFont(qtg.QFont(cfg.default_font, 14))
         author_label.setAlignment(qtc.Qt.AlignCenter)
         author_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         self.layout().addWidget(author_label)
+        verticalSpacer = qtw.QSpacerItem(20, 15, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        self.layout().addItem(verticalSpacer)
 
         # Creates run, train, and select model buttons within vertical layout
         count_button = qtw.QPushButton("Count")
@@ -256,7 +266,7 @@ class CountWindow(qtw.QWidget):
         if not self.selection_wanted_button.isChecked():
             self.next_button.setText("Run Model")
 
-    def select_images(self):
+    def name_count (self):
         
         # Pulls models from unamedNumber.json and adds them to the dropdown
         with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
@@ -273,83 +283,86 @@ class CountWindow(qtw.QWidget):
             with open(f"{cwd}/internal/resources/unamedNumber.json", "w") as jsonFile:
                 json.dump({"values": value+1}, jsonFile)
         
+        #self.run_button_clicked()
+
+    def select_images(self):
+        
         #print(name_of_the_count)
-        if (self.done):
-            if (self.thresh_button.checkState() and self.selection_wanted_button.checkState()):
-                self.thresh_button.setParent(None)
-                self.selection_wanted_button.setParent(None)
-                self.next_button.setParent(None)
+        
+        if (self.thresh_button.checkState() and self.selection_wanted_button.checkState()):
+            self.thresh_button.setParent(None)
+            self.selection_wanted_button.setParent(None)
+            self.next_button.setParent(None)
 
-                self.title_label.setText("Select Images\nTo Save")
+            self.title_label.setText("Select Images\nTo Save")
 
-                
-                # Creates help/quit button split at bottom
-                self.menu_split1 = qtw.QHBoxLayout()
-                self.menu_split1.setSpacing(10)
-                self.layout().addLayout(self.menu_split1)
-                self.menu_split2 = qtw.QHBoxLayout()
-                self.menu_split2.setSpacing(10)
-                self.layout().addLayout(self.menu_split2)
-                self.menu_split3 = qtw.QHBoxLayout()
-                self.menu_split3.setSpacing(10)
-                self.layout().addLayout(self.menu_split3)
-                self.menu_split4 = qtw.QHBoxLayout()
-                self.menu_split4.setSpacing(10)
-                self.layout().addLayout(self.menu_split4)
-                self.menu_split5 = qtw.QHBoxLayout()
-                self.menu_split5.setSpacing(10)
-                self.layout().addLayout(self.menu_split5)
+            
+            # Creates help/quit button split at bottom
+            self.menu_split1 = qtw.QHBoxLayout()
+            self.menu_split1.setSpacing(10)
+            self.layout().addLayout(self.menu_split1)
+            self.menu_split2 = qtw.QVBoxLayout()
+            self.menu_split2.setSpacing(10)
+            self.menu_split1.addLayout(self.menu_split2)
+            self.menu_split3 = qtw.QVBoxLayout()
+            self.menu_split3.setSpacing(10)
+            self.menu_split1.addLayout(self.menu_split3)
+            self.menu_split4 = qtw.QVBoxLayout()
+            self.menu_split4.setSpacing(10)
+            self.menu_split1.addLayout(self.menu_split4)
+            
 
-                
-                # Creates checkboxes for saving images
-                self.image1_buttontest = qtw.QCheckBox("#1 Original")
-                self.image1_buttontest.setChecked(True)
-                self.menu_split1.addWidget(self.image1_buttontest)
+            
+            # Creates checkboxes for saving images
+            self.image1_buttontest = qtw.QCheckBox("#1 Original")
+            self.image1_buttontest.setChecked(True)
+            self.menu_split2.addWidget(self.image1_buttontest)
 
-                self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
-                self.image2_buttontest.setChecked(False)
-                self.menu_split2.addWidget(self.image2_buttontest)
+            self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
+            self.image2_buttontest.setChecked(False)
+            self.menu_split2.addWidget(self.image2_buttontest)
 
-                self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
-                self.image3_buttontest.setChecked(False)
-                self.menu_split3.addWidget(self.image3_buttontest)
+            self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
+            self.image3_buttontest.setChecked(False)
+            self.menu_split2.addWidget(self.image3_buttontest)
 
-                self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
-                self.image4_buttontest.setChecked(False)
-                self.menu_split4.addWidget(self.image4_buttontest)
+            self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
+            self.image4_buttontest.setChecked(False)
+            self.menu_split3.addWidget(self.image4_buttontest)
 
-                self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
-                self.image5_buttontest.setChecked(True)
-                self.menu_split5.addWidget(self.image5_buttontest)
+            self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
+            self.image5_buttontest.setChecked(True)
+            self.menu_split3.addWidget(self.image5_buttontest)
 
-                self.image6_buttontest = qtw.QCheckBox("#6 Closing")
-                self.image6_buttontest.setChecked(False)
-                self.menu_split1.addWidget(self.image6_buttontest)
+            self.image6_buttontest = qtw.QCheckBox("#6 Closing")
+            self.image6_buttontest.setChecked(False)
+            self.menu_split3.addWidget(self.image6_buttontest)
 
-                self.image7_buttontest = qtw.QCheckBox("#7 Final")
-                self.image7_buttontest.setChecked(True)
-                self.menu_split2.addWidget(self.image7_buttontest)
+            self.image7_buttontest = qtw.QCheckBox("#7 Final")
+            self.image7_buttontest.setChecked(True)
+            self.menu_split4.addWidget(self.image7_buttontest)
 
-                self.image8_buttontest = qtw.QCheckBox("#8 Extra")
-                self.image8_buttontest.setChecked(False)
-                self.menu_split3.addWidget(self.image8_buttontest)
+            self.image8_buttontest = qtw.QCheckBox("#8 Extra")
+            self.image8_buttontest.setChecked(False)
+            self.menu_split4.addWidget(self.image8_buttontest)
 
-                self.image9_buttontest = qtw.QCheckBox("#9 Unused")
-                self.image9_buttontest.setChecked(False)
-                self.menu_split4.addWidget(self.image9_buttontest)
+            self.image9_buttontest = qtw.QCheckBox("#9 Unused")
+            self.image9_buttontest.setChecked(False)
+            self.menu_split4.addWidget(self.image9_buttontest)
 
-                # Creates a run button
-                self.run_button = qtw.QPushButton("Run Model")
-                self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-                self.run_button.clicked.connect(self.get_rid_of_checkboxes)
-                self.layout().addWidget(self.run_button)
+            # Creates a run button
+            self.run_button = qtw.QPushButton("Run Model")
+            self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+            self.run_button.clicked.connect(self.get_rid_of_checkboxes)
+            self.layout().addWidget(self.run_button)
 
-                #fixes location of start button
-                self.layout().addWidget(self.back_button)
-            else:
-                # Changes title text
-                # self.title_label.setText("Count in Progress ...")
-                
+            #fixes location of start button
+            self.layout().addWidget(self.back_button)
+        else:
+            # Changes title text
+            # self.title_label.setText("Count in Progress...")
+            self.name_count()
+            if self.done:
                 # Removes widgets from the layout
                 self.thresh_button.setParent(None)
                 self.selection_wanted_button.setParent(None)
@@ -358,29 +371,31 @@ class CountWindow(qtw.QWidget):
                 self.run_button_clicked()
 
     def get_rid_of_checkboxes(self):
-        self.menu_split1.setParent(None)
-        self.menu_split2.setParent(None)
-        self.menu_split3.setParent(None)
-        self.menu_split4.setParent(None)
-        self.menu_split5.setParent(None)
+        self.name_count()
+        if self.done:
+            self.menu_split1.setParent(None)
+            self.menu_split2.setParent(None)
+            self.menu_split3.setParent(None)
+            self.menu_split4.setParent(None)
 
-        self.image1_buttontest.setParent(None)
-        self.image2_buttontest.setParent(None)
-        self.image3_buttontest.setParent(None)
-        self.image4_buttontest.setParent(None)
-        self.image5_buttontest.setParent(None)
-        self.image6_buttontest.setParent(None)
-        self.image7_buttontest.setParent(None)
-        self.image8_buttontest.setParent(None)
-        self.image9_buttontest.setParent(None)
+            self.image1_buttontest.setParent(None)
+            self.image2_buttontest.setParent(None)
+            self.image3_buttontest.setParent(None)
+            self.image4_buttontest.setParent(None)
+            self.image5_buttontest.setParent(None)
+            self.image6_buttontest.setParent(None)
+            self.image7_buttontest.setParent(None)
+            self.image8_buttontest.setParent(None)
+            self.image9_buttontest.setParent(None)
 
-        self.run_button.setParent(None)
+            self.run_button.setParent(None)
+            
+            self.run_button_clicked()
 
         # Changes title text
         # self.title_label.setText("Count in Progress ...")
 
         #run the actualy counting stuff
-        self.run_button_clicked()
 
     def view_past(self):
         # Removes file button and back button
@@ -483,70 +498,72 @@ class CountWindow(qtw.QWidget):
         os.startfile(paths)
 
     def run_button_clicked(self):
+    # Removes widgets from the layout
+        self.thresh_button.setParent(None)
+        self.back_button.setParent(None)
+        self.next_button.setParent(None)
 
-        if self.done:
-            list_images = self.list_image(image_dir)
-            directory.creatCountDirectorySaving(list_images[1], self.name_of_count)
-            
-            # Removes widgets from the layout
-            self.thresh_button.setParent(None)
-            self.back_button.setParent(None)
-            self.next_button.setParent(None)
-            # Changes title text
-            self.title_label.setText("Count in Progress ...")
-            self.layout().addWidget(self.back_button)
-            
-            # Breaks images into tiles
-            tiling.tile(input_image_list=list_images[0], output_tiles_dir=f"{cwd}/external/detections/{self.name_of_count}/images/segmentation")
+        # Changes title text
+        self.title_label.setText("Count in Progress ...")
+        time.sleep(3)
+        self.run_detections()
 
-            # Runs detections
-            with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
-                model_dict = json.load(f)
-            detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
-            
-            # if thresh button is checked run the file
-            if (self.thresh_button.checkState()):
-                try:
-                    thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
-                                                self.image1_buttontest.checkState(),
-                                                self.image2_buttontest.checkState(),
-                                                self.image3_buttontest.checkState(),
-                                                self.image4_buttontest.checkState(),
-                                                self.image5_buttontest.checkState(),
-                                                self.image6_buttontest.checkState(),
-                                                self.image7_buttontest.checkState(),
-                                                self.image8_buttontest.checkState(),
-                                                self.image9_buttontest.checkState())
-                except:
-                    thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
-                                                False,
-                                                False,
-                                                False,
-                                                False,
-                                                False,
-                                                False,
-                                                False,
-                                                False,
-                                                False,)
+    def run_detections(self):
+
+        list_images = self.list_image(image_dir)
+        directory.creatCountDirectorySaving(list_images[1], self.name_of_count)
+        
+        # Breaks images into tiles
+        tiling.tile(input_image_list=list_images[0], output_tiles_dir=f"{cwd}/external/detections/{self.name_of_count}/images/segmentation")
+
+        # Runs detections
+        with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            model_dict = json.load(f)
+        detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
+        
+        # if thresh button is checked run the file
+        if (self.thresh_button.checkState()):
+            try:
+                thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
+                                            self.image1_buttontest.checkState(),
+                                            self.image2_buttontest.checkState(),
+                                            self.image3_buttontest.checkState(),
+                                            self.image4_buttontest.checkState(),
+                                            self.image5_buttontest.checkState(),
+                                            self.image6_buttontest.checkState(),
+                                            self.image7_buttontest.checkState(),
+                                            self.image8_buttontest.checkState(),
+                                            self.image9_buttontest.checkState())
+            except:
+                thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
+                                            False,
+                                            False,
+                                            False,
+                                            False,
+                                            False,
+                                            False,
+                                            False,
+                                            False,
+                                            False,)
 
 
-            self.title_label.setText("Detection\n Complete")
-            self.back_button.setText("Main Menu")
+        self.title_label.setText("Detection\n Complete")
+        self.back_button.setText("Main Menu")
 
-            # Creates an open pictures button
-            self.open_pics = qtw.QPushButton("Open Detection Pictures")
-            self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.name_of_count))
-            self.layout().addWidget(self.open_pics)
+        # Creates an open pictures button
+        self.open_pics = qtw.QPushButton("Open Detection Pictures")
+        self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.name_of_count))
+        self.layout().addWidget(self.open_pics)
 
-            # Creates an open excell button
-            self.open_sheet = qtw.QPushButton("Open Excel Count")
-            self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.name_of_count))
-            self.layout().addWidget(self.open_sheet)
+        # Creates an open excell button
+        self.open_sheet = qtw.QPushButton("Open Excel Count")
+        self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.name_of_count))
+        self.layout().addWidget(self.open_sheet)
 
-            # Adds the back button
-            self.layout().addWidget(self.back_button)
+        # Adds the back button
+        self.layout().addWidget(self.back_button)
 
     
     def list_image (self, image_dir_counting):

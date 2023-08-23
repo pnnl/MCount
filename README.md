@@ -1,10 +1,7 @@
 # MCount
 MCount is a GUI App built with PyQt5 that streamlines object detection. It utilizes a built-in computer vision model and thresholding system to accurately gather mussel larvae settlement data. It can also run or train any tensorflow object detection model! 
 
-## Installation
-TODO
-
-## How to Use MCoun
+## How to Use MCount
 You can minimize MCount anytime by clicking the - near the top right corner.
  
 The window cannot be enlarged to keep the formatting intact - MCount is meant to be a compact GUI app.
@@ -34,9 +31,6 @@ To view your detected images, open them from the ~\MCount\detections directory.
 
 **If you're running a mussel larvae detection, keep both boxes checked.
 
-### Train Model
-TODO
-
 ### Select Model
 After clicking the Select Model button, the main menu will disappear and the Select Model window will open. 
 
@@ -50,8 +44,6 @@ After selecting the model folder, a text input dialog will pop up. Type the name
 
 After entering the name of the model, the current model will change to the one you just selected. Now this model will be used whenever you train or run detections in MCount.
 
-## About the Developers
-TODO
 
 
 

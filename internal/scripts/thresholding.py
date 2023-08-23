@@ -64,7 +64,7 @@ def threshFunction (image_dir_counting, countName, imagess,
     musselCountAry = []
     blackPxlAry = []
 
-    numPixPerMussle = 150
+    numPixPerMussle = 143.8
 
     # iterate over files in
     # that directory
@@ -199,7 +199,7 @@ def threshFunction (image_dir_counting, countName, imagess,
         print ("white pixles: ", number_of_white_pix)
         print ("black pixles: ", number_of_black_pix)
         
-        mussel = number_of_black_pix/numPixPerMussle
+        mussel = round(number_of_black_pix/numPixPerMussle)
         
         print ("Number of Mussels in clumps: ", mussel)
         
