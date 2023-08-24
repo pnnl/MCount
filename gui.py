@@ -8,8 +8,8 @@ import os
 import subprocess
 import time
 import textwrap
-import numpy as np
 import pandas as pd
+import styleframe
 from pathlib import Path
 
 from subprocess import Popen
@@ -267,7 +267,6 @@ class CountWindow(qtw.QWidget):
             self.next_button.setText("Run Model")
 
     def name_count (self):
-        
         # Pulls models from unamedNumber.json and adds them to the dropdown
         with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
             model_dict = json.load(json_File)
@@ -286,9 +285,6 @@ class CountWindow(qtw.QWidget):
         #self.run_button_clicked()
 
     def select_images(self):
-        
-        #print(name_of_the_count)
-        
         if (self.thresh_button.checkState() and self.selection_wanted_button.checkState()):
             self.thresh_button.setParent(None)
             self.selection_wanted_button.setParent(None)
@@ -489,12 +485,11 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def open_pics_button_clicked (self, countName):
-        #subprocess.Popen(f'explorer /select,"{cwd}/external/detections/{countName}/images"')
-        paths = "external\\detections\\"+  countName + "\\images"
+        paths = cwd + "/external/detections/"+  countName + "/images"
         os.startfile(paths)
 
     def open_sheet_button_clicked (self, countName):
-        paths = "external\\detections\\"+  countName + "\\spreadsheets"
+        paths = cwd + "/external/detections/"+  countName + "/spreadsheets"
         os.startfile(paths)
 
     def run_button_clicked(self):
@@ -509,7 +504,6 @@ class CountWindow(qtw.QWidget):
         self.run_detections()
 
     def run_detections(self):
-
         list_images = self.list_image(image_dir)
         directory.creatCountDirectorySaving(list_images[1], self.name_of_count)
         
@@ -519,12 +513,12 @@ class CountWindow(qtw.QWidget):
         # Runs detections
         with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
             model_dict = json.load(f)
-        detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
+        seg_count = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
         
         # if thresh button is checked run the file
         if (self.thresh_button.checkState()):
             try:
-                thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
+                thresh_count = thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
                                             self.image1_buttontest.checkState(),
                                             self.image2_buttontest.checkState(),
                                             self.image3_buttontest.checkState(),
@@ -535,7 +529,7 @@ class CountWindow(qtw.QWidget):
                                             self.image8_buttontest.checkState(),
                                             self.image9_buttontest.checkState())
             except:
-                thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
+                thresh_count = thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
                                             False,
                                             False,
                                             False,
@@ -546,6 +540,23 @@ class CountWindow(qtw.QWidget):
                                             False,
                                             False,)
 
+
+            total_count_array = []
+
+            for i in range(len(seg_count)):
+                total_count_array.append(seg_count[i] + thresh_count[i])
+
+        else:
+            total_count_array = seg_count
+
+        # Creates a stylized excel sheet with totals
+        locationFor_sheet = cwd + "/external/detections/"+  self.name_of_count + "/spreadsheets"
+        countSheet = pd.ExcelWriter(locationFor_sheet + "/" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
+        df = pd.DataFrame({"Image": list_images[1], "Total Count": total_count_array})
+        sf = styleframe.StyleFrame(df)
+        sf.set_column_width(columns = ["Image"], width=30)
+        sf.to_excel(excel_writer=countSheet, sheet_name="Totals", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
+        countSheet.close()
 
         self.title_label.setText("Detection\n Complete")
         self.back_button.setText("Main Menu")

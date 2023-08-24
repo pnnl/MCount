@@ -47,9 +47,4 @@ def creatCountDirectorySaving (imageList, countName):
     location = "external\\detections\\"+  countName + "\\spreadsheets"
     musselSheet = pd.ExcelWriter(location + "\\" + 'overall_counts.xlsx', engine='xlsxwriter')
 
-    dfFull = pd.DataFrame({'File Name': imageList, })
-
-    #adds the names of the pictuers in this count set
-    dfFull.to_excel(musselSheet, sheet_name='Total', index=False)
-
     musselSheet.close()

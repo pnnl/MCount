@@ -1,17 +1,16 @@
 import numpy as np
 import cv2
-import math
 import ntpath
 import pandas as pd
 
 import os
+import styleframe
 
-import urllib.request
 from PIL import Image
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image
 
-from PIL import Image, ImageEnhance    
+from PIL import Image
 
 from pathlib import Path
 
@@ -55,10 +54,6 @@ def threshFunction (image_dir_counting, countName, imagess,
     # get the path/directory
 
     #sheet=pd.read_excel("musselCountingTest.xlsx")
-
-    locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
-
-    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
 
     fileNameAry = []
     musselCountAry = []
@@ -213,18 +208,16 @@ def threshFunction (image_dir_counting, countName, imagess,
         fileNameAry.append(useThing)
         musselCountAry.append(mussel)
         blackPxlAry.append(number_of_black_pix)
-            
 
-
-    df = pd.DataFrame({'File Name': fileNameAry, 'Mussel Count (in clumps)': musselCountAry, 'Black Pixles': blackPxlAry})
-
-    df.to_excel(countSheet, sheet_name='Thresholding', index=False)
-
-
+    locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
+    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
+    df = pd.DataFrame({'File Name': fileNameAry, 'Clump Mussel Count': musselCountAry, 'Black Pixels': blackPxlAry})
+    sf = styleframe.StyleFrame(df)
+    sf.to_excel(excel_writer=countSheet, best_fit=["File Name", "Clump Mussel Count", "Black Pixels"], sheet_name="Thresholding", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
     countSheet.close()
 
 
     print ("\ndone done done")
 
-
+    return musselCountAry
 
