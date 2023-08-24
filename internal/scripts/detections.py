@@ -15,6 +15,7 @@ import openpyxl
 import cv2 
 import numpy as np
 import re
+import styleframe
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as viz_utils
@@ -93,8 +94,8 @@ def detect(model_path, name_of_count, labelmap_path):
                 os.mkdir(DETECTED_COUPON_PATH_NAME)             # Creates the detected tile folder specific to this coupon in the "tiles detected" folder
             tile_count = np.array([0,0]) # Initializes the array that will contain the mussel count for a specific tile.
             SUB_PATH_NAME = DIR_PATH_NAME + '\\' + sub_dir[1][i] # Defines the name of the coupon-specific folder where the raw tiles are.
-            SUB_PATH = Path(SUB_PATH_NAME).glob('*.png') # Prepares the coupons-specific raw tile filder to be looped through.
-            for pic in SUB_PATH: #Loop through the tiles in the folder for the current coupon.
+            SUB_PATH = Path(SUB_PATH_NAME).glob('*.png') # Prepares the coupons-specific raw tile folder to be looped through.
+            for pic in SUB_PATH: # Loop through the tiles in the folder for the current coupon.
                 name = str(pic)  # Converts the tile name to string format.
                 img = cv2.imread(name) # Reads the tile as an image.
                 image_np = np.array(img) # Converts the image data to a numpy array.
@@ -217,27 +218,16 @@ def detect(model_path, name_of_count, labelmap_path):
                 tile_count = np.vstack([tile_count,[base_name,len(index_array__size_and_overlap_filtered__for_counting)]]) # !!!! Use this line if you want to count the size_and_overlap_filtered boxes
                 #tile_count = np.vstack([tile_count,[base_name,len(list(indeces_of_areas_above_minimum_and_below_maximum))]]) # !!!!! Use this line if you want to count the size_filtered boxes. Stacks the tile mussels counts into a list of the tile mussel counts
                 plt.imshow(cv2.cvtColor(image_np_with_detections, cv2.COLOR_BGR2RGB)) # Shows the image below
-                plt.show() # Shows the image below
                 
                 # Save the detected tile image
                 cv2.imwrite(os.path.join(DETECTED_COUPON_PATH_NAME,base_name0),image_np_with_detections) #saves the tile as an image in the tiles detected folder
             
-            # Turn the mussel count for this tile into a dataframe so it can be saved as excel. This clump of code saves an excel file into each coupon folder;...
-            # ... Each spreadsheet contains a list of the mussel counts for each individual tile. 
-            df = pd.DataFrame(tile_count) # Create a pandas dataframe from the list of tile counts
-            df.columns = ['Coupon ID','Solos'] # Add titles to the two columns in the dataframe
+            
             solos_sum = tile_count[:, 1].astype(float).sum() # Adds up the tile mussel counts to get a total coupon mussel count.
             names_array.append(sub_dir[1][i]) # Creates an array of the coupon names so the coupon total counts can be tabulated in a single spreadsheet
             total_sum = solos_sum # + light_clump_sum + heavy_clump_sum . This was originally for adding the clump counts, but we don't count clumps any more. This doesn't initialize the total_sum_array.
             total_sum_array.append(total_sum) # Stacks the total coupon sums into an array. I don't know why I didn't have to initialize the array first.
-            # create excel writer object
-            excel_path = cwd + "/external/detections/" + name_of_count + "/spreadsheets/overall_counts.xlsx" # Generates the path for writing the total coupon sums spreadsheet
-            writer = pd.ExcelWriter(excel_path)
-            # write dataframe to excel
-            df.to_excel(writer, sheet_name = "Extra from Detections", index = False)
-            # save the excel
-            writer.close()  # Save the excel file.
-            print('DataFrame is written successfully to Excel File.')
+        print("Coupon Succesfully Detected")
 
     # Run this cell; it is in preparation for the next cell, which puts all the individual coupon counts into a single spreadsheet
 
@@ -246,13 +236,15 @@ def detect(model_path, name_of_count, labelmap_path):
         return merged_list
 
     # Writes the total coupon sums spreadsheet.
-    df_coupon_count = pd.DataFrame({'Coupon ID': names_array, 'Total': total_sum_array})
-    # df_name = df_name
-    # create excel writer object
+    df_coupon_count = pd.DataFrame({"Image": names_array, "Total": total_sum_array})
     excel_path = cwd + "/external/detections/" + name_of_count + "/spreadsheets/overall_counts.xlsx"
-    writer = pd.ExcelWriter(excel_path)
+    writer = pd.ExcelWriter(excel_path, mode="a", engine = "openpyxl")
     # write dataframe to excel
-    df_coupon_count.to_excel(writer, sheet_name = "Segmentation", index = False)
+    sf = styleframe.StyleFrame(df_coupon_count)
+    sf.set_column_width(columns = ["Image"], width=30)
+    sf.to_excel(excel_writer=writer, sheet_name="Segmentation", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
     # save the excel
     writer.close()
     print('DataFrame is written successfully to Excel File.')
+
+    return total_sum_array
