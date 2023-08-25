@@ -543,8 +543,15 @@ class CountWindow(qtw.QWidget):
 
             total_count_array = []
 
-            for i in range(len(seg_count)):
-                total_count_array.append(seg_count[i] + thresh_count[i])
+            for i in range(len(list_images[1])):
+                seg_num = 0
+                thresh_num = 0
+                for p in range(len(list_images[1])):
+                    if (seg_count[1][i] == list_images[1]):
+                        seg_num = p
+                    if (thresh_count[1][i] == list_images[1]):
+                        thresh_num = p
+                total_count_array.append(seg_count[0][seg_num] + thresh_count[0][thresh_num])
 
         else:
             total_count_array = seg_count
