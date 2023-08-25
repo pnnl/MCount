@@ -11,6 +11,7 @@ import textwrap
 import pandas as pd
 import styleframe
 from pathlib import Path
+import openpyxl
 
 from subprocess import Popen
 
@@ -485,12 +486,12 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def open_pics_button_clicked (self, countName):
-        paths = cwd + "/external/detections/"+  countName + "/images"
-        os.startfile(paths)
+        path = cwd + "/external/detections/"+  countName + "/images"
+        os.startfile(path)
 
     def open_sheet_button_clicked (self, countName):
-        paths = cwd + "/external/detections/"+  countName + "/spreadsheets"
-        os.startfile(paths)
+        path = cwd + "/external/detections/"+  countName + "/spreadsheets/overall_counts.xlsx"
+        os.startfile(path)
 
     def run_button_clicked(self):
     # Removes widgets from the layout
@@ -557,12 +558,15 @@ class CountWindow(qtw.QWidget):
             total_count_array = seg_count
 
         # Creates a stylized excel sheet with totals
-        locationFor_sheet = cwd + "/external/detections/"+  self.name_of_count + "/spreadsheets"
-        countSheet = pd.ExcelWriter(locationFor_sheet + "/" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
+        full_path = cwd + "/external/detections/"+  self.name_of_count + "/spreadsheets/overall_counts.xlsx"
+        workbook = openpyxl.load_workbook(full_path)
+        sheet1 = workbook.get_sheet_by_name("Sheet1")
+        sheet1.title = "Totals"
+        workbook.save(full_path)
+        countSheet = pd.ExcelWriter(full_path, mode="a", engine='openpyxl', if_sheet_exists='replace')
         df = pd.DataFrame({"Image": list_images[1], "Total Count": total_count_array})
         sf = styleframe.StyleFrame(df)
-        sf.set_column_width(columns = ["Image"], width=30)
-        sf.to_excel(excel_writer=countSheet, sheet_name="Totals", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
+        sf.to_excel(excel_writer=countSheet, sheet_name="Totals", best_fit=["Image", "Total Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
         countSheet.close()
 
         self.title_label.setText("Detection\n Complete")
