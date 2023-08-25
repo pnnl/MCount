@@ -21,8 +21,10 @@ import internal.scripts.thresholding as thresholding
 import internal.scripts.directory as directory
 import internal.scripts.detections as detections
 
+# Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
 
+# Makes the GUI agree more with OS window scaling 
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
@@ -48,7 +50,7 @@ def defaultUI(window):
 
 
 class MainWindow(qtw.QWidget):
-    # Defines window initialization
+    # Function is run as soon as window is initialized
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -105,31 +107,35 @@ class MainWindow(qtw.QWidget):
         self.show()
 
     def count_button_clicked(self):
+        # Closes the main window and opens the count window
         self.cw = CountWindow()
         self.cw.move(self.pos())
         self.cw.show()
         self.close()
 
     def train_button_clicked(self):
+        # Closes the main window and opens the train window
         self.tw = TrainWindow()
         self.tw.move(self.pos())
         self.tw.show()
         self.close()
     
     def select_button_clicked(self):
+        # Closes the main window and opens the select model window
         self.sw = SelectWindow()
         self.sw.move(self.pos())
         self.sw.show()
         self.close()
 
     def help_button_clicked(self):
+        # Opens the help document
         os.startfile('README.md')
     
     def quit_button_clicked(self):
         self.close()
 
-
 class CountWindow(qtw.QWidget):
+    # Function is run as soon as window is initialized
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -164,6 +170,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def begin_button_clicked(self):
+        # Clears window elements
         self.begin_button.setParent(None)
         self.past_counts_button.setParent(None)
         self.back_button.setParent(None)
@@ -190,10 +197,12 @@ class CountWindow(qtw.QWidget):
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
 
+        # Pulls current model directory from modeldict.json
         with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
             model_dict = json.load(f)
             current_model_name = model_dict[model_dict["current_model_directory"]]
         
+        # Will check if an image directory was chosen and if they have the MCount model selected
         if image_dir and current_model_name == "MCount Mussel Detector":
             # Bypasses the labelmap file dialog
             global labelmap_bypass
@@ -208,7 +217,6 @@ class CountWindow(qtw.QWidget):
             # Continues as if labelmap button was pressed
             self.labelmap_button_clicked()
 
-        
         # Checks if images were chosen
         elif image_dir:
             # Removes file button and back button
@@ -234,13 +242,13 @@ class CountWindow(qtw.QWidget):
             self.back_button.setParent(None)
 
             # Creates checkboxes for thresholding and spreadsheet
-            self.thresh_button = qtw.QCheckBox("Run Thresholding")
-            self.thresh_button.setChecked(True)
-            self.thresh_button.stateChanged.connect(self.thresh_checkbox_changed)
-            self.layout().addWidget(self.thresh_button)
-            self.selection_wanted_button = qtw.QCheckBox("Download Specific Thresholding Images")
-            self.selection_wanted_button.stateChanged.connect(self.select_checkbox_changed)
-            self.layout().addWidget(self.selection_wanted_button)
+            self.thresh_checkbox = qtw.QCheckBox("Run Thresholding")
+            self.thresh_checkbox.setChecked(True)
+            self.thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
+            self.layout().addWidget(self.thresh_checkbox)
+            self.img_selection_checkbox = qtw.QCheckBox("Download Specific Thresholding Images")
+            self.img_selection_checkbox.stateChanged.connect(self.select_checkbox_changed)
+            self.layout().addWidget(self.img_selection_checkbox)
 
             # Creates a run button
             self.next_button = qtw.QPushButton("Run Model")
@@ -251,20 +259,26 @@ class CountWindow(qtw.QWidget):
             # Adds the back button
             self.layout().addWidget(self.back_button)
 
+    # This function is run anytime the thresholding checkbox is checked or unchecked
     def thresh_checkbox_changed(self):
-        if self.thresh_button.isChecked():
-            self.layout().addWidget(self.selection_wanted_button)
+        # If the checkbox is checked, another checkbox is created for the user to select specific thresholding images
+        if self.thresh_checkbox.isChecked():
+            self.layout().addWidget(self.img_selection_checkbox)
             self.layout().addWidget(self.next_button)
             self.layout().addWidget(self.back_button)
-        if not self.thresh_button.isChecked():
-            self.selection_wanted_button.setChecked(False)
-            self.selection_wanted_button.setParent(None)
 
+        # If the thresholding checkbox is unchecked, the selection checkbox is removed
+        if not self.thresh_checkbox.isChecked():
+            self.img_selection_checkbox.setChecked(False)
+            self.img_selection_checkbox.setParent(None)
 
+    # This function is run anytime the selection checkbox is checked or unchecked
     def select_checkbox_changed(self):
-        if self.selection_wanted_button.isChecked():
+        # If the selection checkbox is checked, change the next button text 
+        if self.img_selection_checkbox.isChecked():
             self.next_button.setText("Next")
-        if not self.selection_wanted_button.isChecked():
+        # If the selection checkbox is checked, change the next button text 
+        if not self.img_selection_checkbox.isChecked():
             self.next_button.setText("Run Model")
 
     def name_count (self):
@@ -274,7 +288,7 @@ class CountWindow(qtw.QWidget):
             value_list = list(model_dict.values())
         value = value_list[0]
             
-        #name the count
+        # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
         name, self.done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         self.name_of_count = f"Unamed {value}"
         if name and self.done:
@@ -282,18 +296,17 @@ class CountWindow(qtw.QWidget):
         else:
             with open(f"{cwd}/internal/resources/unamedNumber.json", "w") as jsonFile:
                 json.dump({"values": value+1}, jsonFile)
-        
-        #self.run_button_clicked()
 
     def select_images(self):
-        if (self.thresh_button.checkState() and self.selection_wanted_button.checkState()):
-            self.thresh_button.setParent(None)
-            self.selection_wanted_button.setParent(None)
+        if (self.thresh_checkbox.checkState() and self.img_selection_checkbox.checkState()):
+            # Clears previous app elements
+            self.thresh_checkbox.setParent(None)
+            self.img_selection_checkbox.setParent(None)
             self.next_button.setParent(None)
 
+            # Changes title
             self.title_label.setText("Select Images\nTo Save")
 
-            
             # Creates help/quit button split at bottom
             self.menu_split1 = qtw.QHBoxLayout()
             self.menu_split1.setSpacing(10)
@@ -307,8 +320,6 @@ class CountWindow(qtw.QWidget):
             self.menu_split4 = qtw.QVBoxLayout()
             self.menu_split4.setSpacing(10)
             self.menu_split1.addLayout(self.menu_split4)
-            
-
             
             # Creates checkboxes for saving images
             self.image1_buttontest = qtw.QCheckBox("#1 Original")
@@ -353,16 +364,15 @@ class CountWindow(qtw.QWidget):
             self.run_button.clicked.connect(self.get_rid_of_checkboxes)
             self.layout().addWidget(self.run_button)
 
-            #fixes location of start button
+            # Fixes location of start button
             self.layout().addWidget(self.back_button)
+
         else:
-            # Changes title text
-            # self.title_label.setText("Count in Progress...")
             self.name_count()
             if self.done:
                 # Removes widgets from the layout
-                self.thresh_button.setParent(None)
-                self.selection_wanted_button.setParent(None)
+                self.thresh_checkbox.setParent(None)
+                self.img_selection_checkbox.setParent(None)
                 self.next_button.setParent(None)
 
                 self.run_button_clicked()
@@ -370,6 +380,7 @@ class CountWindow(qtw.QWidget):
     def get_rid_of_checkboxes(self):
         self.name_count()
         if self.done:
+            # Removes a million widgets LOL
             self.menu_split1.setParent(None)
             self.menu_split2.setParent(None)
             self.menu_split3.setParent(None)
@@ -387,12 +398,8 @@ class CountWindow(qtw.QWidget):
 
             self.run_button.setParent(None)
             
+            # Begins the detections
             self.run_button_clicked()
-
-        # Changes title text
-        # self.title_label.setText("Count in Progress ...")
-
-        #run the actualy counting stuff
 
     def view_past(self):
         # Removes file button and back button
@@ -400,8 +407,7 @@ class CountWindow(qtw.QWidget):
         self.begin_button.setParent(None)
         self.past_counts_button.setParent(None)
 
-        self.selection = ""
-
+        # Adds a title label
         self.title_label = qtw.QLabel("View Past\nDetection Counts")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
@@ -416,27 +422,27 @@ class CountWindow(qtw.QWidget):
         self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a past counts label 
-        self.model_label = qtw.QLabel(f"Past Count:")
+        self.past_counts_label = qtw.QLabel(f"Past Count:")
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
-        self.model_label.setSizePolicy(size_policy)
-        self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.model_label.setAlignment(qtc.Qt.AlignCenter)
-        self.dropdown_layout.addWidget(self.model_label)
+        self.past_counts_label.setSizePolicy(size_policy)
+        self.past_counts_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_label.setAlignment(qtc.Qt.AlignCenter)
+        self.dropdown_layout.addWidget(self.past_counts_label)
         
         # Creates a dropdown menu of available counts
-        self.model_dropdown = qtw.QComboBox()
-        self.model_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
+        self.past_counts_dropdown = qtw.QComboBox()
+        self.past_counts_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.past_counts_dropdown.currentIndexChanged.connect(self.past_counts_dropdown_changed)
         size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        self.model_dropdown.setSizePolicy(size_policy)
-        self.dropdown_layout.addWidget(self.model_dropdown)
+        self.past_counts_dropdown.setSizePolicy(size_policy)
+        self.dropdown_layout.addWidget(self.past_counts_dropdown)
 
-        # adds to the dropdown
+        # Iterates through the de
         directory = cwd + "/external/detections"
         dirs = os.listdir(directory)
         dirs.remove("placeholder")
         for item in dirs:
-            self.model_dropdown.addItem(item)
+            self.past_counts_dropdown.addItem(item)
            
 
         if (len(dirs) > 0):
@@ -446,7 +452,7 @@ class CountWindow(qtw.QWidget):
             self.next_button.clicked.connect(self.next_once_selected)
             self.layout().addWidget(self.next_button)
         else:
-            self.model_dropdown.addItem("No Previous Counts")
+            self.past_counts_dropdown.addItem("No Previous Counts")
 
         self.layout().addWidget(self.back_button)
 
@@ -455,9 +461,7 @@ class CountWindow(qtw.QWidget):
         self.back_button.setText("Main Menu")
 
         self.next_button.setParent(None)
-        #self.model_dropdown.setParent(None)
-        #self.model_label.setParent(None)
-        
+
         # Creates an open pictures button
         self.open_pics = qtw.QPushButton("Open Detection Pictures")
         self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
@@ -473,10 +477,10 @@ class CountWindow(qtw.QWidget):
         # Adds the back button
         self.layout().addWidget(self.back_button)
 
-    def model_dropdown_changed(self,index):
+    def past_counts_dropdown_changed(self,index):
         # Records the new selected model (count version) anytime the dropdown menu is changed
-        self.selected_model = self.model_dropdown.itemText(index)
-        self.selection = self.model_dropdown.itemText(index) 
+        self.selected_model = self.past_counts_dropdown.itemText(index)
+        self.selection = self.past_counts_dropdown.itemText(index) 
         return self.selected_model
     
     def back_button_clicked (self):
@@ -486,16 +490,18 @@ class CountWindow(qtw.QWidget):
         self.close()
 
     def open_pics_button_clicked (self, countName):
+        # Opens the images path
         path = cwd + "/external/detections/"+  countName + "/images"
         os.startfile(path)
 
     def open_sheet_button_clicked (self, countName):
+        # Opens the counts spreadsheet from the spreadsheets path
         path = cwd + "/external/detections/"+  countName + "/spreadsheets/overall_counts.xlsx"
         os.startfile(path)
 
     def run_button_clicked(self):
-    # Removes widgets from the layout
-        self.thresh_button.setParent(None)
+        # Removes widgets from the layout
+        self.thresh_checkbox.setParent(None)
         self.back_button.setParent(None)
         self.next_button.setParent(None)
 
@@ -517,7 +523,7 @@ class CountWindow(qtw.QWidget):
         seg_count = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
         
         # if thresh button is checked run the file
-        if (self.thresh_button.checkState()):
+        if (self.thresh_checkbox.checkState()):
             try:
                 thresh_count = thresholding.threshFunction(image_dir, self.name_of_count, list_images[0],
                                             self.image1_buttontest.checkState(),
@@ -543,25 +549,30 @@ class CountWindow(qtw.QWidget):
 
 
             total_count_array = []
-
+            
+            # Combines the segmentation and thresholding counts to give a total mussel count
             for i in range(len(seg_count)):
                 total_count_array.append(seg_count[i] + thresh_count[i])
 
+        # Just segmentation for non-mussel counting
         else:
             total_count_array = seg_count
 
-        # Creates a stylized excel sheet with totals
+        # Takes the first sheet generated by directory.py and makes it the totals sheet
         full_path = cwd + "/external/detections/"+  self.name_of_count + "/spreadsheets/overall_counts.xlsx"
         workbook = openpyxl.load_workbook(full_path)
         sheet1 = workbook.get_sheet_by_name("Sheet1")
         sheet1.title = "Totals"
         workbook.save(full_path)
+
+        # Creates a pandas dataframe with the totals, stylizes it, and then adds it to the excel spreadsheet
         countSheet = pd.ExcelWriter(full_path, mode="a", engine='openpyxl', if_sheet_exists='replace')
         df = pd.DataFrame({"Image": list_images[1], "Total Count": total_count_array})
         sf = styleframe.StyleFrame(df)
         sf.to_excel(excel_writer=countSheet, sheet_name="Totals", best_fit=["Image", "Total Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
         countSheet.close()
 
+        # Changes the title and cancel button to fit a "complete" dialog
         self.title_label.setText("Detection\n Complete")
         self.back_button.setText("Main Menu")
 
@@ -571,7 +582,7 @@ class CountWindow(qtw.QWidget):
         self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.name_of_count))
         self.layout().addWidget(self.open_pics)
 
-        # Creates an open excell button
+        # Creates an open excel button
         self.open_sheet = qtw.QPushButton("Open Excel Count")
         self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.name_of_count))
@@ -582,8 +593,10 @@ class CountWindow(qtw.QWidget):
 
     
     def list_image (self, image_dir_counting):
+        # Initializes the list of image paths
         images = []
 
+        # Iterates through all the .tif, .jpg, and .png files in the image directory and adds the path to each one
         images1 = Path(image_dir_counting).glob('*.tif')
         for i in images1:
             images.append(i)
@@ -594,11 +607,12 @@ class CountWindow(qtw.QWidget):
         for i in images1:
             images.append(i)
 
+        # Initializes the list of image names
         names = []
         
+        # Iterates through each image path and takes its file name WITHOUT the file type extension (.png, .tif, etc)
         for i in images:
             useThing = os.path.basename(i)
-            
             names.append(useThing)
 
         return [images, names]
