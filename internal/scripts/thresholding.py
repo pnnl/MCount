@@ -218,5 +218,5 @@ def threshFunction (image_dir_counting, countName, imagess,
 
     print ("\ndone done done")
 
-    return musselCountAry
+    return [musselCountAry, fileNameAry]
 

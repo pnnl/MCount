@@ -246,4 +246,4 @@ def detect(model_path, name_of_count, labelmap_path):
     writer.close()
     print('DataFrame is written successfully to Excel File.')
 
-    return total_sum_array
+    return [total_sum_array, names_array]
