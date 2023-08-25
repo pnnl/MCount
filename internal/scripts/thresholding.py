@@ -25,7 +25,6 @@ def threshFunction (image_dir_counting, countName, imagess,
                     image7_buttontest,
                     image8_buttontest,
                     image9_buttontest):
-    # -*- coding: utf-8 -*-
     """
     Created on Wed Jul 28 07:07:59 2023
 
@@ -211,9 +210,9 @@ def threshFunction (image_dir_counting, countName, imagess,
 
     locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
     countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
-    df = pd.DataFrame({'File Name': fileNameAry, 'Clump Mussel Count': musselCountAry, 'Black Pixels': blackPxlAry})
+    df = pd.DataFrame({'Image': fileNameAry, 'Clump Mussel Count': musselCountAry, 'Black Pixels': blackPxlAry})
     sf = styleframe.StyleFrame(df)
-    sf.to_excel(excel_writer=countSheet, best_fit=["File Name", "Clump Mussel Count", "Black Pixels"], sheet_name="Thresholding", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
+    sf.to_excel(excel_writer=countSheet, best_fit=["Image", "Clump Mussel Count", "Black Pixels"], sheet_name="Thresholding", columns_and_rows_to_freeze='B2', row_to_add_filters=0)
     countSheet.close()
 
 
