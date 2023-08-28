@@ -19,7 +19,3 @@ header_font_size = 30
 
 # Font size for subtext and all buttons (also changes overall button size accordingly)
 button_font_size = 14
-
-
-
-

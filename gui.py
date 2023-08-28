@@ -1,3 +1,16 @@
+from colorama import *
+from termcolor import * 
+from pyfiglet import *
+import time
+
+cprint(figlet_format("MCount", font="standard"), attrs=["bold"])
+
+time.sleep(1)
+
+print("Open the README for complete app instructions.\n")
+
+time.sleep(1)
+
 import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
@@ -7,20 +20,18 @@ import sys
 import os
 import re
 import subprocess
-import time
 import textwrap
 import pandas as pd
 import styleframe
 from pathlib import Path
 import openpyxl
 
-from subprocess import Popen
-
 import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
 import internal.scripts.directories as dirs
 import internal.scripts.detections as detections
+
 
 # Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
@@ -43,8 +54,8 @@ def defaultUI(window):
     
     # Creates window at specific size
     if cfg.small_screen:
-        window.setMinimumSize(600, 425)
-        window.setMaximumSize(601, 426)
+        window.setMinimumSize(400, 300)
+        window.setMaximumSize(401, 301)
     else:
         window.setMinimumSize(550, 375)
         window.setMaximumSize(551, 376)
@@ -133,6 +144,7 @@ class MainWindow(qtw.QWidget):
         os.startfile('README.md')
     
     def quit_button_clicked(self):
+        # Closes the GUI and ends the application runtime
         self.close()
 
 class CountWindow(qtw.QWidget):
@@ -527,7 +539,7 @@ class CountWindow(qtw.QWidget):
         with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
             model_dict = json.load(f)
         seg_count_and_names = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=self.name_of_count, labelmap_path=self.labelmap)
-        
+
         # if thresh button is checked run the file
         if (self.thresh_checkbox.checkState()):
             try:

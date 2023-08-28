@@ -14,23 +14,31 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import directories as dirs
+from colorama import *
+from termcolor import * 
+from pyfiglet import *
+import line_profiler
+import atexit
 
-seg_count_and_names = [[1, 2, 3, 4], ["first", "second", "third", "fourth"]]
+profile = line_profiler.LineProfiler()
+atexit.register(profile.print_stats)
 
-thresh_count_and_names = [[7, 9, 12, 3], ["second", "first", "fourth", "third"]]
+@profile
+def profiled_function():
+    import os
+    import tensorflow as tf
+    import pandas as pd
+    import openpyxl
+    import cv2 
+    import numpy as np
+    import re
+    import styleframe
 
-total_count_array = []
+    from object_detection.utils import label_map_util
+    from object_detection.utils import visualization_utils as viz_utils
+    from object_detection.builders import model_builder
+    from object_detection.utils import config_util
+    from matplotlib import pyplot as plt
+    from pathlib import Path
 
-import os
-
-dir_list = next(os.walk(dirs.detections))[1]
-
-print(dir_list)
-
-
-
-# Pulls models from unamedNumber.json and adds them to the dropdown
-with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
-    model_dict = json.load(json_File)
-    value_list = list(model_dict.values())
-value = value_list[0]  
+profiled_function()

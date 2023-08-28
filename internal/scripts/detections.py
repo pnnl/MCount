@@ -1,21 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # *** this means an input by the user is required.
-
-# # Import packages
-
-# In[3]:
-
-
 import os
-import tensorflow as tf
+from tensorflow import *
 import pandas as pd
-import openpyxl
 import cv2 
 import numpy as np
 import re
 import styleframe
+import time
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as viz_utils
@@ -24,11 +14,17 @@ from object_detection.utils import config_util
 from matplotlib import pyplot as plt
 from pathlib import Path
 
-
+from colorama import *
+from termcolor import * 
+from pyfiglet import *
 
 def detect(model_path, name_of_count, labelmap_path):
+    print(f"\nBeginning detection named {name_of_count}...")
+    print("----------------------------------------------------\n")
+
+
     cwd = (os.getcwd()).replace("\\", "/")
-    print(name_of_count)
+
     # Get a list of files in the folder
     files = os.listdir(model_path)
 
@@ -47,11 +43,11 @@ def detect(model_path, name_of_count, labelmap_path):
     configs = config_util.get_configs_from_pipeline_file(f"{model_path}/pipeline.config")
     detection_model = model_builder.build(model_config=configs['model'], is_training=False)
 
-    ckpt = tf.compat.v2.train.Checkpoint(model=detection_model)
+    ckpt = compat.v2.train.Checkpoint(model=detection_model)
     ckpt.restore(f"{model_path}/{max_number_ckpt}").expect_partial()
 
     # # Define the function "detect_fn" that you will be using
-    @tf.function
+    @function
     def detect_fn(image):
         image, shapes = detection_model.preprocess(image)
         prediction_dict = detection_model.predict(image, shapes)
@@ -80,14 +76,12 @@ def detect(model_path, name_of_count, labelmap_path):
     # For solo mussels only
 
     DIR_PATH_NAME = cwd + "/external/detections/" + name_of_count + "/images/segmentation"
-    print(DIR_PATH_NAME)                                                                                    # Generates the full FOLDER path name for the 'raw tiles' subfolder in ...
-                                                                                    # ... the instance folder.
     DETECTED_PATH_NAME = cwd + "/external/detections/" + name_of_count + "/images/segmentation" # Defines the folder where the post-detection tiles will be saved
     score_thresh = 0.05 # *** Enter here the confidence score, from 0 to 1, above which you will accept a detection. For our difficult-to-see mussels, we use 0.1.
 
     total_sum_array = [] # Initializes the array that will store the mussel totals for each COUPON (not tile).
     names_array = []   # Initializes the array that will store the coupon names (that will be linked to the mussel totals)
-    for sub_dir in os.walk(DIR_PATH_NAME): # Starts the loop that walks through across every coupon-specific folder in the "tiles raw" subfolde
+    for sub_dir in os.walk(DIR_PATH_NAME): # Starts the loop that walks through across every coupon-specific folder in the "tiles raw" subfolder
         for i in range(len(sub_dir[1])): # Starts the loop that walks through every tile in the coupon folders within the "tiles raw" subfolder 
             DETECTED_COUPON_PATH_NAME = DETECTED_PATH_NAME + '/' + sub_dir[1][i] # Defines the name of the coupon-specific folder that the detected tile images will go into.
             if not os.path.exists(DETECTED_COUPON_PATH_NAME):
@@ -99,7 +93,7 @@ def detect(model_path, name_of_count, labelmap_path):
                 name = str(pic)  # Converts the tile name to string format.
                 img = cv2.imread(name) # Reads the tile as an image.
                 image_np = np.array(img) # Converts the image data to a numpy array.
-                input_tensor = tf.convert_to_tensor(np.expand_dims(image_np, 0), dtype=tf.float32) # Converts the numpy array to a tensor.
+                input_tensor = convert_to_tensor(np.expand_dims(image_np, 0), dtype=float32) # Converts the numpy array to a tensor.
                 detections = detect_fn(input_tensor) # Executes the object detection function on the image tensor. Results are stored in the array called "detections"
                                                     # Num_detections will always be 100 - it's not the number of actual detections, it's the limit I think.
                 num_detections = int(detections.pop('num_detections')) # I don't understand
@@ -227,13 +221,7 @@ def detect(model_path, name_of_count, labelmap_path):
             names_array.append(sub_dir[1][i]) # Creates an array of the coupon names so the coupon total counts can be tabulated in a single spreadsheet
             total_sum = solos_sum # + light_clump_sum + heavy_clump_sum . This was originally for adding the clump counts, but we don't count clumps any more. This doesn't initialize the total_sum_array.
             total_sum_array.append(total_sum) # Stacks the total coupon sums into an array. I don't know why I didn't have to initialize the array first.
-        print("Coupon Succesfully Detected")
-
-    # Run this cell; it is in preparation for the next cell, which puts all the individual coupon counts into a single spreadsheet
-
-    def merge(list1, list2):
-        merged_list = [(list1[i], list2[i]) for i in range(0, len(list1))]
-        return merged_list
+        print("\n Image Successfully Detected. \n")
 
     # Writes the total coupon sums spreadsheet.
     df_coupon_count = pd.DataFrame({"Image": names_array, "Count": total_sum_array})
@@ -244,6 +232,9 @@ def detect(model_path, name_of_count, labelmap_path):
     sf.to_excel(excel_writer=writer, sheet_name="Segmentation", best_fit=["Image", "Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
     # save the excel
     writer.close()
-    print('DataFrame is written successfully to Excel File.')
+    print('\n DataFrame successfully written to Excel File.\n')
+    print("Detection Complete!")
+    print("--------------------------------------------------------------\n")
+    time.sleep(3)
 
     return [total_sum_array, names_array]
