@@ -20,7 +20,6 @@
 # Import dependencies
 import cv2
 import os
-from pathlib import Path
 
 # This defines the pathway for this algorith to look for whatever Instance folder you have defined above. My TFODCourse folder is inside
 # a folder called OD13 inside my user folder, but you may have placed yours somewhere else when you downloaded the github files and

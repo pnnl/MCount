@@ -5,6 +5,7 @@ import PyQt5.QtCore as qtc
 import json
 import sys
 import os
+import re
 import subprocess
 import time
 import textwrap
@@ -18,13 +19,13 @@ from subprocess import Popen
 import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
-import internal.scripts.directory as directory
+import internal.scripts.directories as dirs
 import internal.scripts.detections as detections
 
 # Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
 
-# Makes the GUI agree more with OS window scaling 
+# Makes the GUI agree better with OS window scaling 
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
@@ -282,21 +283,26 @@ class CountWindow(qtw.QWidget):
             self.next_button.setText("Run Model")
 
     def name_count (self):
-        # Pulls models from unamedNumber.json and adds them to the dropdown
-        with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
-            model_dict = json.load(json_File)
-            value_list = list(model_dict.values())
-        value = value_list[0]
+        # Finds the highest number in the unnamed folders and adds 1
+        unnamed_files = []
+        pattern = re.compile(r"\d+")
+        for sub_dir in next(os.walk(dirs.detections))[1]:
+            if "Unnamed Detection" in sub_dir:
+                match = pattern.findall(str(sub_dir))
+                if match:
+                    unnamed_files.append(int(match[0]))
+        if unnamed_files != []: 
+            value = max(unnamed_files) + 1
+        else:
+            value = 1
             
         # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
         name, self.done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
-        self.name_of_count = f"Unamed {value}"
+        if name == "" and self.done:
+            self.name_of_count = f"Unnamed Detection {value}"
         if name and self.done:
             self.name_of_count = name
-        else:
-            with open(f"{cwd}/internal/resources/unamedNumber.json", "w") as jsonFile:
-                json.dump({"values": value+1}, jsonFile)
-
+        
     def select_images(self):
         if (self.thresh_checkbox.checkState() and self.img_selection_checkbox.checkState()):
             # Clears previous app elements
@@ -512,7 +518,7 @@ class CountWindow(qtw.QWidget):
 
     def run_detections(self):
         images_list = self.list_image(image_dir)
-        directory.creatCountDirectorySaving(images_list[1], self.name_of_count)
+        dirs.new_detection_directory(images_list[1], self.name_of_count)
         
         # Breaks images into tiles
         tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{cwd}/external/detections/{self.name_of_count}/images/segmentation")

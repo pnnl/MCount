@@ -13,6 +13,7 @@ import cv2
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import directories as dirs
 
 seg_count_and_names = [[1, 2, 3, 4], ["first", "second", "third", "fourth"]]
 
@@ -20,12 +21,16 @@ thresh_count_and_names = [[7, 9, 12, 3], ["second", "first", "fourth", "third"]]
 
 total_count_array = []
 
-# Combines the segmentation and thresholding counts to give a total mussel count
-for i in range(len(seg_count_and_names[1])):
-    for p in range(len(thresh_count_and_names[1])):
-        if seg_count_and_names[1][i] == thresh_count_and_names[1][p]:
-            seg_element = i
-            thresh_element = p
-    total_count_array.append(seg_count_and_names[0][seg_element] + thresh_count_and_names[0][thresh_element])
+import os
 
-print(total_count_array)
+dir_list = next(os.walk(dirs.detections))[1]
+
+print(dir_list)
+
+
+
+# Pulls models from unamedNumber.json and adds them to the dropdown
+with open(f"{cwd}/internal/resources/unamedNumber.json", "r") as json_File:
+    model_dict = json.load(json_File)
+    value_list = list(model_dict.values())
+value = value_list[0]  
