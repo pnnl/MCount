@@ -14,29 +14,18 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-path = r"C:\Users\mill286\Desktop\new.xlsx"
+seg_count_and_names = [[1, 2, 3, 4], ["first", "second", "third", "fourth"]]
 
-x1 = np.random.randn(100, 2)
-df1 = pd.DataFrame(x1)
+thresh_count_and_names = [[7, 9, 12, 3], ["second", "first", "fourth", "third"]]
 
-x2 = np.random.randn(100, 2)
-df2 = pd.DataFrame(x2)
+total_count_array = []
 
-writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
-df1.to_excel(writer, sheet_name = 'x1')
-df2.to_excel(writer, sheet_name = 'x2')
-writer.close()
+# Combines the segmentation and thresholding counts to give a total mussel count
+for i in range(len(seg_count_and_names[1])):
+    for p in range(len(thresh_count_and_names[1])):
+        if seg_count_and_names[1][i] == thresh_count_and_names[1][p]:
+            seg_element = i
+            thresh_element = p
+    total_count_array.append(seg_count_and_names[0][seg_element] + thresh_count_and_names[0][thresh_element])
 
-book = pd.load_workbook(path)
-writer = pd.ExcelWriter(path, engine = 'openpyxl')
-writer.book = book
-
-x3 = np.random.randn(100, 2)
-df3 = pd.DataFrame(x3)
-
-x4 = np.random.randn(100, 2)
-df4 = pd.DataFrame(x4)
-
-df3.to_excel(writer, sheet_name = 'x3')
-df4.to_excel(writer, sheet_name = 'x4')
-writer.close()
+print(total_count_array)
