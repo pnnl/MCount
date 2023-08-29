@@ -20,25 +20,8 @@ from pyfiglet import *
 import line_profiler
 import atexit
 
-profile = line_profiler.LineProfiler()
-atexit.register(profile.print_stats)
+num = 2
 
-@profile
-def profiled_function():
-    import os
-    import tensorflow as tf
-    import pandas as pd
-    import openpyxl
-    import cv2 
-    import numpy as np
-    import re
-    import styleframe
-
-    from object_detection.utils import label_map_util
-    from object_detection.utils import visualization_utils as viz_utils
-    from object_detection.builders import model_builder
-    from object_detection.utils import config_util
-    from matplotlib import pyplot as plt
-    from pathlib import Path
-
-profiled_function()
+for i in range(0, 10):
+    print(len(str(num)))
+    num = num*num
