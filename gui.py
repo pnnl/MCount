@@ -554,6 +554,7 @@ class CountWindow(qtw.QWidget):
         self.selection = self.past_counts_dropdown.itemText(index) 
         return self.selected_model
     
+# Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the rest of the GUI
 class DetectionThread(qtc.QThread):
     def list_image (self, image_dir_counting):
         # Initializes the list of image paths
@@ -592,7 +593,7 @@ class DetectionThread(qtc.QThread):
             model_dict = json.load(f)
         seg_count_and_names = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=labelmap)
 
-        # if thresh button is checked run the file
+        # Checks if the user selected mussel thresholding or not
         if (thresh_checkbox.checkState()):
             try:
                 thresh_count_and_names = thresholding.threshFunction(image_dir, name_of_count, images_list[0],
@@ -643,8 +644,6 @@ class DetectionThread(qtc.QThread):
         sf = styleframe.StyleFrame(df)
         sf.to_excel(excel_writer=countSheet, sheet_name="Totals", best_fit=["Image", "Total Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
         countSheet.close()
-        # complete = CountWindow.count_complete(CountWindow)
-        # complete(CountWindow)
 
 
 class TrainWindow (qtw.QWidget):
