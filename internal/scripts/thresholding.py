@@ -64,14 +64,14 @@ def threshFunction (image_dir_counting, countName, imagess,
     # that directory
     images = imagess
 
-    print("\n\n ---------------------------------- ")
+    print("\n\n========= thresholding beginns")
     print(image_dir_counting)
 
         
     for image in images:
-        print ("-----------------------------------------------------------")
+        print ("--------- next picture")
         
-        print(image)
+        print("image: ", image)
 
         imageUse = ntpath.abspath(image)
 
@@ -140,11 +140,11 @@ def threshFunction (image_dir_counting, countName, imagess,
         locationForThis = "external\\detections\\"+  countName + "\\images\\thresholding"
 
         place = locationForThis + "\\"+ useThing
-        print (place)
+        print ("file paths of directories made:", place)
         try:
             os.mkdir(ntpath.abspath(place))
         except:
-            print("skiped")
+            print("skipped making new directories")
         #os.replace(ntpath.abspath(place))
         cv2.imwrite((place+"/1_og.jpg"), img)
         if (image2_buttontest):
@@ -190,19 +190,19 @@ def threshFunction (image_dir_counting, countName, imagess,
         total = np.sum(myFinalUse)
         
         
-        print ("white pixles: ", number_of_white_pix)
+        #print ("white pixles: ", number_of_white_pix)
         print ("black pixles: ", number_of_black_pix)
         
         mussel = round(number_of_black_pix/numPixPerMussle)
         
-        print ("Number of Mussels in clumps: ", mussel)
+        print ("number of Mussels in clumps: ", mussel)
         
-        print ("done")
+        print ("done thresholding this image")
         
-        print("\n\n\n\n\n\ntotal (added): ", number_of_white_pix+number_of_black_pix)
-        print("the toal number of pixels in a picture of a coupon is 2170 * 2170 = 4708900")
+        #print("\n\n\n\n\n\ntotal (added): ", number_of_white_pix+number_of_black_pix)
+        #print("the toal number of pixels in a picture of a coupon is 2170 * 2170 = 4708900")
         
-        print("total (actual): nvm not true", total)
+        #print("total (actual): nvm not true", total)
         
         fileNameAry.append(useThing)
         musselCountAry.append(mussel)
@@ -216,7 +216,7 @@ def threshFunction (image_dir_counting, countName, imagess,
     countSheet.close()
 
 
-    print ("\ndone done done")
+    print ("\n^^^^^^^^^ done thresholding for this count")
 
     return [musselCountAry, fileNameAry]
 
