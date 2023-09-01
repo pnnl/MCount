@@ -1,6 +1,7 @@
 import ntpath
 import pandas as pd
 import os
+
 cwd = (os.getcwd()).replace("\\", "/")
 
 detections = cwd + "/external/detections"
@@ -9,9 +10,21 @@ dict = cwd + "/internal/resources/modeldict.json"
 training = cwd + "/external/training"
 scripts = cwd + "/internal/scripts"
 
-def new_detection_directory(imageList, countName):
+def new_detection_directory(countName):
     # the following will make all the folders to organize the different parts of detection and counting and will skip making the folder if it already exists
-    path = cwd + "/external/detections/"+  countName
+    path = cwd + "/external"
+    try:
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped")
+    
+    path = cwd + "/external/detections"
+    try:
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped")
+    
+    path = cwd + "/external/training"
     try:
         os.mkdir(ntpath.abspath(path))
     except:

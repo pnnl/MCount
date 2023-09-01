@@ -20,8 +20,4 @@ from pyfiglet import *
 import line_profiler
 import atexit
 
-num = 2
-
-for i in range(0, 10):
-    print(len(str(num)))
-    num = num*num
+dirs.new_detection_directory("whoa")
