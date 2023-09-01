@@ -12,9 +12,6 @@ from PIL import Image
 
 from PIL import Image
 
-from pathlib import Path
-
-
 def threshFunction (image_dir_counting, countName, imagess,
                     image1_buttontest,
                     image2_buttontest,

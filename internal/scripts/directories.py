@@ -4,42 +4,51 @@ import os
 cwd = (os.getcwd()).replace("\\", "/")
 
 detections = cwd + "/external/detections"
-
+resources = cwd + "/internal/resources"
+dict = cwd + "/internal/resources/modeldict.json"
+training = cwd + "/external/training"
+scripts = cwd + "/internal/scripts"
 
 def new_detection_directory(imageList, countName):
-    # the follwing will make all the folders to organize the different parts of detection and counting and will skip making the folder if it already exists 
-
-    locationForThis = cwd + "/external/detections/"+  countName
+    # the following will make all the folders to organize the different parts of detection and counting and will skip making the folder if it already exists
+    path = cwd + "/external/detections/"+  countName
     try:
-        os.mkdir(ntpath.abspath(locationForThis))
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped")
+    
+    
+    path = cwd + "/external/detections/"+  countName
+    try:
+        os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    locationForThis = cwd + "/external/detections/"+  countName + "/images"
+    path = cwd + "/external/detections/"+  countName + "/images"
     try:
-        os.mkdir(ntpath.abspath(locationForThis))
+        os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    locationForThis = cwd + "/external/detections/"+  countName + "/images/segmentation"
+    path = cwd + "/external/detections/"+  countName + "/images/segmentation"
     try:
-        os.mkdir(ntpath.abspath(locationForThis))
+        os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    locationForThis = cwd + "/external/detections/"+  countName + "/images/thresholding"
+    path = cwd + "/external/detections/"+  countName + "/images/thresholding"
     try:
-        os.mkdir(ntpath.abspath(locationForThis))
+        os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    locationForThis = cwd + "/external/detections/"+  countName + "/spreadsheets"
+    path = cwd + "/external/detections/"+  countName + "/spreadsheets"
     try:
-        os.mkdir(ntpath.abspath(locationForThis))
+        os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 

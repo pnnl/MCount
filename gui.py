@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 import textwrap
+import random
 import pandas as pd
 import styleframe
 from pathlib import Path
@@ -31,7 +32,6 @@ import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
 import internal.scripts.directories as dirs
 import internal.scripts.detections as detections
-
 
 # Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
@@ -147,6 +147,7 @@ class MainWindow(qtw.QWidget):
         # Closes the GUI and ends the application runtime
         self.close()
 
+
 class CountWindow(qtw.QWidget):
     # Function is run as soon as window is initialized
     def __init__(self):
@@ -209,7 +210,7 @@ class CountWindow(qtw.QWidget):
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
 
         # Pulls current model directory from modeldict.json
-        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+        with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
             current_model_name = model_dict[model_dict["current_model_directory"]]
         
@@ -444,12 +445,6 @@ class CountWindow(qtw.QWidget):
         # Adds the back button
         self.layout().addWidget(self.back_button)
 
-    def back_button_clicked (self):
-        self.mw = MainWindow()
-        self.mw.move(self.pos())
-        self.mw.show()
-        self.close()
-
     def run_button_clicked(self):
         # Removes widgets from the layout
         thresh_checkbox.setParent(None)
@@ -458,12 +453,37 @@ class CountWindow(qtw.QWidget):
 
         # Changes title text
         self.title_label.setText("Count in Progress...")
+        
+        # Adds a progress bar 
+        self.progress_bar = qtw.QProgressBar()
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(500)
+        self.layout().addWidget(self.progress_bar)
 
+        self.random_percent1 = random.randint(175, 450)
+        self.random_percent2 = random.randint(175, 450)
+        self.random_percent3 = random.randint(175, 450)
+
+        # Randomly increases the progress bar to keep user foolishly entertained 
+        for i in range(self.random_percent1):
+            time.sleep(0.01)
+            self.progress_bar.setValue(i + 1)
+
+        # Runs the detections
         self.detection = DetectionThread()
         self.detection.start()
         self.detection.finished.connect(self.count_complete)
 
     def count_complete(self):
+        remainder = 500 - self.random_percent
+
+        # Pushes the progress bar to 100%
+        for i in range(remainder):
+            time.sleep(0.01)
+            self.progress_bar.setValue(remainder + i + 1)
+        
+        time.sleep(2)
+        
         # Changes the title and cancel button to fit a "complete" dialog
         self.title_label.setText("Count\n Complete")
         self.back_button.setText("Main Menu")
@@ -483,14 +503,14 @@ class CountWindow(qtw.QWidget):
         # Adds the back button
         self.layout().addWidget(self.back_button)
 
-    def open_pics_button_clicked (self, countName):
+    def open_pics_button_clicked (self, count_name):
         # Opens the images pathWE 
-        path = cwd + "/external/detections/"+  countName + "/images"
+        path = dirs.detections + "/" + count_name + "/images"
         os.startfile(path)
 
-    def open_sheet_button_clicked (self, countName):
+    def open_sheet_button_clicked (self, count_name):
         # Opens the counts spreadsheet from the spreadsheets path
-        path = cwd + "/external/detections/"+  countName + "/spreadsheets/overall_counts.xlsx"
+        path = dirs.detections + "/" + count_name + "/spreadsheets/overall_counts.xlsx"
         os.startfile(path)
 
     def view_past(self):
@@ -529,14 +549,12 @@ class CountWindow(qtw.QWidget):
         self.past_counts_dropdown.setSizePolicy(size_policy)
         self.dropdown_layout.addWidget(self.past_counts_dropdown)
 
-        # Iterates through the de
-        directory = cwd + "/external/detections"
-        dirs = os.listdir(directory)
-        dirs.remove("placeholder")
+        # Iterates through the detections
+        sub_dirs = os.listdir(dirs.detections)
+        sub_dirs.remove("placeholder")
         for item in dirs:
             self.past_counts_dropdown.addItem(item)
            
-
         if (len(dirs) > 0):
             # Creates a next button
             self.next_button = qtw.QPushButton("Next")
@@ -554,6 +572,13 @@ class CountWindow(qtw.QWidget):
         self.selection = self.past_counts_dropdown.itemText(index) 
         return self.selected_model
     
+    def back_button_clicked (self):
+        self.mw = MainWindow()
+        self.mw.move(self.pos())
+        self.mw.show()
+        self.close()
+
+
 # Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the rest of the GUI
 class DetectionThread(qtc.QThread):
     def list_image (self, image_dir_counting):
@@ -586,10 +611,10 @@ class DetectionThread(qtc.QThread):
         dirs.new_detection_directory(images_list[1], name_of_count)
         
         # Breaks images into tiles
-        tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{cwd}/external/detections/{name_of_count}/images/segmentation")
+        tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/segmentation")
 
         # Runs detections
-        with open (f"{cwd}/internal/resources/modeldict.json", "r") as f:
+        with open (dirs.dict, "r") as f:
             model_dict = json.load(f)
         seg_count_and_names = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=labelmap)
 
@@ -632,7 +657,7 @@ class DetectionThread(qtc.QThread):
             total_count_array = seg_count_and_names[0]
 
         # Takes the first sheet generated by directory.py and makes it the totals sheet
-        full_path = cwd + "/external/detections/"+  name_of_count + "/spreadsheets/overall_counts.xlsx"
+        full_path = dirs.detections + "/" + name_of_count + "/spreadsheets/overall_counts.xlsx"
         workbook = openpyxl.load_workbook(full_path)
         sheet1 = workbook.get_sheet_by_name("Sheet1")
         sheet1.title = "Totals"
@@ -734,11 +759,11 @@ class TrainWindow (qtw.QWidget):
             self.close()
             
             # Defines paths to model folders/files
-            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            with open(dirs.dict, "r") as f:
                 model_dict = json.load(f)
-            self.tfrecord_dir = cwd + "/external/training/"+ f"{self.name}.record"
-            self.csv_path = cwd + "/external/training/"+ f"{self.name}.csv"
-            self.script_name = cwd + "/internal/scripts/tfrecord_generation.py"
+            self.tfrecord_dir = dirs.training + f"/{self.name}.record"
+            self.csv_path = dirs.training + f"/{self.name}.csv"
+            self.script_name = dirs.scripts + "/tfrecord_generation.py"
             self.model_dir = model_dict["current_model_directory"]
             self.ckpt_path = self.model_dir + "/reference_model/checkpoint/ckpt-0"
             self.pipeline_dir = self.model_dir + "/pipeline.config"
@@ -799,7 +824,7 @@ class SelectWindow (qtw.QWidget):
         self.dropdown_layout.addWidget(self.model_dropdown)
 
         # Pulls models from modeldict.json and adds them to the dropdown
-        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+        with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
             values = list(model_dict.values())
         directory = model_dict["current_model_directory"]
@@ -846,7 +871,7 @@ class SelectWindow (qtw.QWidget):
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
         self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
-        with open(fr"{cwd}\internal/resources\modeldict.json", "r") as f:
+        with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
         # Checks if a folder was returned and if the folder is already in modeldict.json
         if self.folderpath != "" and self.folderpath not in model_dict:
@@ -855,20 +880,20 @@ class SelectWindow (qtw.QWidget):
     def name_model(self):
         name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name your model:')
         if done and name != "":
-            with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+            with open(dirs.dict, "r") as f:
                 model_dict = json.load(f)
             model_dict[self.folderpath] = name
-            with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
+            with open(dirs.dict, "w") as f:
                 json.dump(model_dict, f, indent=4)
             self.model_dropdown.addItem(name)
 
     def save_button_clicked(self):
         # Changes the current model in modeldict.json to the selected one in the dropdown
-        with open(f"{cwd}/internal/resources/modeldict.json", "r") as f:
+        with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
         selected_model_dir = list(model_dict.keys())[list(model_dict.values()).index(self.selected_model)]
         model_dict["current_model_directory"] = selected_model_dir
-        with open(f"{cwd}/internal/resources/modeldict.json", "w") as f:
+        with open(dirs.dict, "w") as f:
             json.dump(model_dict, f, indent=4)
         for i in range(self.model_dropdown.count()):
             self.model_dropdown.removeItem(i)
