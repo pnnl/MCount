@@ -66,7 +66,7 @@ def threshFunction (image_dir_counting, countName, imagess,
 
         
     for image in images:
-        print ("--------- next picture")
+        print ("\n--------- next picture\n")
         
         print("image: ", image)
 
@@ -145,18 +145,18 @@ def threshFunction (image_dir_counting, countName, imagess,
         #os.replace(ntpath.abspath(place))
         cv2.imwrite((place+"/1_og.jpg"), img)
         if (image2_buttontest):
-            cv2.imwrite((place+"/2_redImage.jpg"), redImage)
+            cv2.imwrite((place+"/2_red_image.jpg"), redImage)
         if (image3_buttontest):
             cv2.imwrite((place+"/3_gray.jpg"), gray)
         if (image4_buttontest):
-            cv2.imwrite((place+"/4_blured.jpg"), blured)
+            cv2.imwrite((place+"/4_blurred.jpg"), blured)
         if (image5_buttontest):
             cv2.imwrite((place+"/5_thresh.jpg"), tempppp)
         if (image6_buttontest):
             cv2.imwrite((place+"/6_closing.jpg"), closing)
-        cv2.imwrite((place+"/7_myFinalUse.jpg"), myFinalUse)
+        cv2.imwrite((place+"/7_my_final_use.jpg"), myFinalUse)
         if (image8_buttontest):
-            cv2.imwrite((place+"/extra_theImgTestAltThresh.jpg"), theImgTestAltThresh)
+            cv2.imwrite((place+"/extra_the_img_test_alt_thresh.jpg"), theImgTestAltThresh)
         if (image9_buttontest):
             cv2.imwrite((place+"/notUsed_closing2.jpg"), closing2)
             cv2.imwrite((place+"/notUsed_regular.jpg"), regular)
@@ -186,20 +186,11 @@ def threshFunction (image_dir_counting, countName, imagess,
         number_of_black_pix = np.sum(myFinalUse == 0)
         total = np.sum(myFinalUse)
         
-        
-        #print ("white pixles: ", number_of_white_pix)
-        print ("black pixles: ", number_of_black_pix)
+        print ("black pixels: ", number_of_black_pix)
         
         mussel = round(number_of_black_pix/numPixPerMussle)
         
-        print ("number of Mussels in clumps: ", mussel)
-        
-        print ("done thresholding this image")
-        
-        #print("\n\n\n\n\n\ntotal (added): ", number_of_white_pix+number_of_black_pix)
-        #print("the toal number of pixels in a picture of a coupon is 2170 * 2170 = 4708900")
-        
-        #print("total (actual): nvm not true", total)
+        print ("number of mussels in clumps: ", mussel)
         
         fileNameAry.append(useThing)
         musselCountAry.append(mussel)
@@ -213,7 +204,7 @@ def threshFunction (image_dir_counting, countName, imagess,
     countSheet.close()
 
 
-    print ("\n^^^^^^^^^ done thresholding for this count")
+    print ("\n^^^^^^^^^^^^thresholding completed^^^^^^^^^^^^")
 
     return [musselCountAry, fileNameAry]
 

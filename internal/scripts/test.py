@@ -19,5 +19,3 @@ from termcolor import *
 from pyfiglet import *
 import line_profiler
 import atexit
-
-dirs.new_detection_directory("whoa")

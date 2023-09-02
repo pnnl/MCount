@@ -50,4 +50,4 @@ def tile(input_image_list, output_tiles_dir):
                 tilename = tile_coord + name_only + '.png' # Adds the tile coordinates to the coupon name to create a unique file name for each tile.
                 tile = (im[y:y+Iy,x:x+Ix]) # generates the tile
                 cv2.imwrite(os.path.join(folder_path, tilename), tile) #saves the tile as an image in the folder_path folder           
-    print('Tiling Completed')
+    print('Successfully broke images into tiles.')

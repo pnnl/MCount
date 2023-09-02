@@ -11,7 +11,7 @@ training = cwd + "/external/training"
 scripts = cwd + "/internal/scripts"
 
 def new_detection_directory(countName):
-    # the following will make all the folders to organize the different parts of detection and counting and will skip making the folder if it already exists
+    # Creates the neccessary directories to organize the different parts of detection and counting and will skip making the directory if it already exists
     path = cwd + "/external"
     try:
         os.mkdir(ntpath.abspath(path))
@@ -71,3 +71,5 @@ def new_detection_directory(countName):
     musselSheet = pd.ExcelWriter(location + "/" + 'overall_counts.xlsx', engine='xlsxwriter')
 
     musselSheet.close()
+
+    print("Successfully created detection directories.")
