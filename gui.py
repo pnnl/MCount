@@ -15,6 +15,9 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import PyQt5.QtCore as qtc
 
+#from PyQt5 import QtWidgets
+#from qtwidgets import AnimatedToggle
+
 import json
 import sys
 import os
@@ -106,6 +109,10 @@ class MainWindow(qtw.QWidget):
         self.layout().addLayout(menu_split)
 
         # Creates help and quit buttons within horizontal layout
+        settings_button = qtw.QPushButton("Settings")
+        settings_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        settings_button.clicked.connect(self.settings_button_clicked)
+        #menu_split.addWidget(settings_button)
         help_button = qtw.QPushButton("Help")
         help_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         help_button.clicked.connect(self.help_button_clicked)
@@ -142,6 +149,13 @@ class MainWindow(qtw.QWidget):
     def help_button_clicked(self):
         # Opens the help document
         os.startfile('README.md')
+
+    def settings_button_clicked(self):
+        # Closes the main window and opens the settings model window
+        self.sw = SettingsWindow()
+        self.sw.move(self.pos())
+        self.sw.show()
+        self.close()
     
     def quit_button_clicked(self):
         # Closes the GUI and ends the application runtime
@@ -928,6 +942,68 @@ class SelectWindow (qtw.QWidget):
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
+
+    def back_button_clicked(self):
+        self.mw = MainWindow()
+        self.mw.move(self.pos())
+        self.mw.show()
+        self.close()
+
+
+class SettingsWindow(qtw.QWidget):
+    # Function is run as soon as window is initialized
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+    
+    def initUI(self):
+        # Adds the default UI elements
+        defaultUI(self)
+
+        # Creates a title label within layout
+        self.title_label = qtw.QLabel("Settings")
+        self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
+        self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
+        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.layout().addWidget(self.title_label)
+
+
+
+        # Creates split for toggle and text
+        menu_split = qtw.QHBoxLayout()
+        menu_split.setSpacing(10)
+        self.layout().addLayout(menu_split)
+
+        #text
+        text_size = qtw.QLabel("Select toggle for small screen size mode. ")
+        text_size.setFont(qtg.QFont(cfg.default_font, 14))
+        text_size.setAlignment(qtc.Qt.AlignCenter)
+        text_size.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        menu_split.addWidget(text_size)
+
+        #toggle for small/ large screen adjustments
+        self.toggle_size = AnimatedToggle(
+            checked_color="#FFB000",
+            pulse_checked_color="#44FFB000"
+        )
+        self.toggle_size.setCheckable(cfg.small_screen)
+        self.toggle_size.clicked.connect(self.toggle_clicked)
+        menu_split.addWidget(self.toggle_size)
+
+
+        # Creates a back button
+        back_button = qtw.QPushButton("Back")
+        back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        back_button.setSizePolicy(size_policy)
+        back_button.clicked.connect(self.back_button_clicked)
+        self.layout().addWidget(back_button)
+
+
+    #change the state of window size
+    def toggle_clicked(self):
+        self.mw = MainWindow()
+
 
     def back_button_clicked(self):
         self.mw = MainWindow()
