@@ -316,11 +316,14 @@ class CountWindow(qtw.QWidget):
         # Finds the highest number in the unnamed folders and adds 1
         unnamed_files = []
         pattern = re.compile(r"\d+")
-        for sub_dir in next(os.walk(dirs.detections))[1]:
-            if "Unnamed Detection" in sub_dir:
-                match = pattern.findall(str(sub_dir))
-                if match:
-                    unnamed_files.append(int(match[0]))
+        try:
+            for sub_dir in next(os.walk(dirs.detections))[1]:
+                if "Unnamed Detection" in sub_dir:
+                    match = pattern.findall(str(sub_dir))
+                    if match:
+                        unnamed_files.append(int(match[0]))
+        except: 
+            print("Weird error with sub dirs occurred (Line 320)")
         if unnamed_files != []: 
             value = max(unnamed_files) + 1
         else:
