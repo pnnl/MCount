@@ -1,3 +1,6 @@
+# ONLY EDIT THIS FILE WHEN THE APP IS CLOSED
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 # Set to True if you are using MCount on a small monitor or laptop
 small_screen = False
 
@@ -7,8 +10,10 @@ default_font = "Leelawadee"
 # Sets the initial directory the file dialog will open to when you select files
 initial_directory = "C:/"
 
+# Sets the font size for the MCount title on the main menu
 title_font_size = 45
 
+# Sets the color for the MCount title on the main menu
 title_color = "#D77600"
 
 # Font color used for all headers

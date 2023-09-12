@@ -217,8 +217,7 @@ class CountWindow(qtw.QWidget):
         # Will check if an image directory was chosen and if they have the MCount model selected
         if image_dir and current_model_name == "MCount Mussel Detector":
             # Bypasses the labelmap file dialog
-            global labelmap_bypass
-            labelmap_bypass = True
+            self.labelmap_bypass = True
             
             self.default_labelmap = cwd + "/internal/model/annotations/labelmap.pbtxt"
 
@@ -250,9 +249,9 @@ class CountWindow(qtw.QWidget):
     def labelmap_button_clicked(self):
         # Checks for labelmap_bypass
         global labelmap
-        if labelmap_bypass == False:
+        if self.labelmap_bypass == False:
             labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-        if labelmap or labelmap_bypass == True:
+        if labelmap or self.labelmap_bypass == True:
             # Does formatting stuff
             self.labelmap_button.setParent(None)
             self.back_button.setParent(None)
@@ -299,24 +298,26 @@ class CountWindow(qtw.QWidget):
             self.next_button.setText("Run Model")
 
     def name_count (self):
-        # Finds the highest number in the unnamed folders and adds 1
-        unnamed_files = []
-        pattern = re.compile(r"\d+")
-        for sub_dir in next(os.walk(dirs.detections))[1]:
-            if "Unnamed Detection" in sub_dir:
-                match = pattern.findall(str(sub_dir))
-                if match:
-                    unnamed_files.append(int(match[0]))
-        if unnamed_files != []: 
-            value = max(unnamed_files) + 1
-        else:
-            value = 1
-            
         # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
         name, self.done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
         global name_of_count
         if name == "" and self.done:
-            name_of_count = f"Unnamed Detection {value}"
+            try:
+                # Finds the highest number in the unnamed folders and adds 1
+                unnamed_files = []
+                pattern = re.compile(r"\d+")
+                for sub_dir in next(os.walk(dirs.detections))[1]:
+                    if "Unnamed Detection" in sub_dir:
+                        match = pattern.findall(str(sub_dir))
+                        if match:
+                            unnamed_files.append(int(match[0]))
+                if unnamed_files != []: 
+                    value = max(unnamed_files) + 1
+                else:
+                    value = 1
+                name_of_count = f"Unnamed Detection {value}"
+            except:
+                name_of_count = f"Unnamed Detection 1"
         if name and self.done:
             name_of_count = name
         
@@ -733,8 +734,26 @@ class TrainWindow (qtw.QWidget):
         # Opens file explorer to choose images
         self.xml_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Image Config Folder", cfg.initial_directory)
         
+        # Pulls current model directory from modeldict.json
+        with open(dirs.dict, "r") as f:
+            model_dict = json.load(f)
+            current_model_name = model_dict[model_dict["current_model_directory"]]
+        
+        # Will check if an image directory was chosen and if they have the MCount model selected. If so, the labelmap dialog will be bypassed. 
+        if self.xml_dir and current_model_name == "MCount Mussel Detector":
+            # Bypasses the labelmap file dialog
+            self.labelmap_bypass = True
+
+            self.labelmap = cwd + "/internal/model/annotations/labelmap.pbtxt"
+            
+            self.xml_button.setParent(None)
+            self.labelmap_button = qtw.QPushButton("Placeholder")
+
+            # Continues as if labelmap button was pressed
+            self.labelmap_button_clicked()
+
         # Checks if images were chosen
-        if self.xml_dir:
+        elif self.xml_dir:
             self.xml_button.setParent(None)
             self.back_button.setParent(None)
             self.labelmap_button = qtw.QPushButton("Select Labelmap (.pbtxt)")
@@ -744,16 +763,21 @@ class TrainWindow (qtw.QWidget):
             self.layout().addWidget(self.back_button)
 
     def labelmap_button_clicked(self):
-        self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-        if self.labelmap:
+        if self.labelmap_bypass == False:
+            # Opens a file dialog to select the model's labelmap
+            self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
+
+        # If the labelmap bypass is true, the app will skip the labelmap selection
+        if self.labelmap or self.labelmap_bypass == True:        
             self.labelmap_button.setParent(None)
             self.back_button.setParent(None)
+            self.title_label.setParent(None)
             self.train_button = qtw.QPushButton("Begin Model Training")
             self.train_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.train_button.clicked.connect(self.train_button_clicked)
             self.layout().addWidget(self.train_button)
             self.layout().addWidget(self.back_button)
-    
+        
     def config_parse(self):
         # Sets important config keys
         key1 = "input_path:"
