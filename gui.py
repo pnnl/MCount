@@ -584,7 +584,7 @@ class CountWindow(qtw.QWidget):
         self.close()
 
 
-# Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the rest of the GUI
+# Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the GUI
 class DetectionThread(qtc.QThread):
     # Defines which signals are transmitted to the loading function
     any_signal = qtc.pyqtSignal(int)
@@ -785,7 +785,6 @@ class TrainWindow (qtw.QWidget):
         if self.labelmap or self.labelmap_bypass == True:        
             self.labelmap_button.setParent(None)
             self.back_button.setParent(None)
-            self.title_label.setParent(None)
             self.train_button = qtw.QPushButton("Begin Model Training")
             self.train_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.train_button.clicked.connect(self.train_button_clicked)
@@ -833,12 +832,14 @@ class TrainWindow (qtw.QWidget):
             self.ckpt_path = self.model_dir + "/reference_model/checkpoint/ckpt-0"
             self.pipeline_dir = self.model_dir + "/pipeline.config"
             
+            # Sets up training directory
+            dirs.new_training_directory(train_name = self.name)
+
             self.config_parse()
             
-            # Opens CMD and runs tfrecord generation, then begins training (I don't know a good way to seperate these processes)
-            subprocess.Popen(["start", "cmd", "/k", "python", self.script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir, "-i", self.xml_dir, "-c", self.csv_path], shell=True)
-            time.sleep(5)
-            subprocess.Popen(["start", "cmd", "/k", "python", f"{cwd}/internal/scripts/model_main_tf2.py", f"--model_dir={self.model_dir}", f"--pipeline_config_path={self.model_dir}/pipeline.config"], shell=True)
+            # Opens CMD and runs tfrecord generation, then begins training (I don't know a good way to separate these processes)
+            subprocess.check_call(["start", "cmd", "/k", "python", self.script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir, "-i", self.xml_dir, "-c", self.csv_path], shell=True)
+            subprocess.check_call(["start", "cmd", "/k", "python", f"{cwd}/internal/scripts/model_main_tf2.py", f"--model_dir={self.model_dir}", f"--pipeline_config_path={self.model_dir}/pipeline.config"], shell=True)
     
     def back_button_clicked(self):
         self.mw = MainWindow()
@@ -991,8 +992,6 @@ class SettingsWindow(qtw.QWidget):
         self.title_label.setAlignment(qtc.Qt.AlignCenter)
         self.layout().addWidget(self.title_label)
 
-
-
         # Creates split for toggle and text
         menu_split = qtw.QHBoxLayout()
         menu_split.setSpacing(10)
@@ -1005,7 +1004,7 @@ class SettingsWindow(qtw.QWidget):
         text_size.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
         menu_split.addWidget(text_size)
 
-        #toggle for small/ large screen adjustments
+        # toggle for small/ large screen adjustments
         self.toggle_size = AnimatedToggle(
             checked_color="#FFB000",
             pulse_checked_color="#44FFB000"

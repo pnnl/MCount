@@ -10,56 +10,49 @@ dict = cwd + "/internal/resources/modeldict.json"
 training = cwd + "/external/training"
 scripts = cwd + "/internal/scripts"
 
-def new_detection_directory(countName):
+def new_detection_directory(count_name):
     # Creates the neccessary directories to organize the different parts of detection and counting and will skip making the directory if it already exists
     path = cwd + "/external"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
-        print("skipped")
+        print("skipped /external")
     
     path = cwd + "/external/detections"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
-        print("skipped")
+        print("skipped /external/detections")
     
-    path = cwd + "/external/training"
+    path = cwd + "/external/detections/" +  count_name
     try:
         os.mkdir(ntpath.abspath(path))
     except:
-        print("skipped")
+        print("skipped /external/detections/ + count_name")
+
     
-    
-    path = cwd + "/external/detections/"+  countName
+    path = cwd + "/external/detections/"+  count_name + "/images"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    path = cwd + "/external/detections/"+  countName + "/images"
+    path = cwd + "/external/detections/"+  count_name + "/images/segmentation"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    path = cwd + "/external/detections/"+  countName + "/images/segmentation"
+    path = cwd + "/external/detections/"+  count_name + "/images/thresholding"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
         print("skipped")
 
     
-    path = cwd + "/external/detections/"+  countName + "/images/thresholding"
-    try:
-        os.mkdir(ntpath.abspath(path))
-    except:
-        print("skipped")
-
-    
-    path = cwd + "/external/detections/"+  countName + "/spreadsheets"
+    path = cwd + "/external/detections/"+  count_name + "/spreadsheets"
     try:
         os.mkdir(ntpath.abspath(path))
     except:
@@ -67,9 +60,29 @@ def new_detection_directory(countName):
 
 
     # this creates the main excel sheet
-    location = cwd + "/external/detections/"+  countName + "/spreadsheets"
+    location = cwd + "/external/detections/"+  count_name + "/spreadsheets"
     musselSheet = pd.ExcelWriter(location + "/" + 'overall_counts.xlsx', engine='xlsxwriter')
 
     musselSheet.close()
 
     print("Successfully created detection directories.")
+
+
+def new_training_directory (train_name):
+    path = cwd + "/external"
+    try:
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped /external")
+    
+    path = cwd + "/external/training"
+    try:
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped /external/training")
+
+    path = cwd + "/external/training" + train_name
+    try:
+        os.mkdir(ntpath.abspath(path))
+    except:
+        print("skipped /external/training")
