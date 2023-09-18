@@ -556,20 +556,23 @@ class CountWindow(qtw.QWidget):
         self.dropdown_layout.addWidget(self.past_counts_dropdown)
 
         # Iterates through the detections
-        sub_dirs = os.listdir(dirs.detections)
-        for item in sub_dirs:
-            self.past_counts_dropdown.addItem(item)
-           
-        if (len(sub_dirs) > 0):
-            # Creates a next button
-            self.next_button = qtw.QPushButton("Next")
-            self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.next_button.clicked.connect(self.next_once_selected)
-            self.layout().addWidget(self.next_button)
+        if os.path.isdir(dirs.detections):
+            sub_dirs = os.listdir(dirs.detections)
+            for item in sub_dirs:
+                self.past_counts_dropdown.addItem(item)
+                
+            if (len(sub_dirs) > 0):
+                # Creates a next button
+                self.next_button = qtw.QPushButton("Next")
+                self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+                self.next_button.clicked.connect(self.next_once_selected)
+                self.layout().addWidget(self.next_button)
+            else:
+                self.past_counts_dropdown.addItem("No Previous Counts")
         else:
             self.past_counts_dropdown.addItem("No Previous Counts")
-
-        self.layout().addWidget(self.back_button)
+            
+            self.layout().addWidget(self.back_button)
 
     def past_counts_dropdown_changed(self,index):
         # Records the new selected model (count version) anytime the dropdown menu is changed
