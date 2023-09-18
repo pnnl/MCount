@@ -32,33 +32,13 @@ def threshFunction (image_dir_counting, countName, imagess,
     Calculates and changes the red thresh layer
     """
 
-
-    # import important librarys
-
-    
-
-    #import gui
-    #from gui import image_dir
-
-    #import config
-
-    #import getpixel
-    #from google.colab.patches import cv2_imshow
-
-    # import required module
-
-    # get the path/directory
-
-    #sheet=pd.read_excel("musselCountingTest.xlsx")
-
     fileNameAry = []
     musselCountAry = []
     blackPxlAry = []
 
     numPixPerMussle = 143.8
 
-    # iterate over files in
-    # that directory
+    # iterate over files in that directory
     images = imagess
 
     print("\n\n========= thresholding beginns")
@@ -73,10 +53,8 @@ def threshFunction (image_dir_counting, countName, imagess,
         imageUse = ntpath.abspath(image)
 
         img = cv2.imread(imageUse) #read image
-        #img = cv2.imread("truetest3.png") #read image
-        hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  #convert to hsv
-        
-        #cv2.imwrite((place+"/1_og.jpg"), img)
+
+        hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) #convert to hsv
 
         # Range for lower red
         lower_red = np.array([0, 65, 0])
@@ -93,34 +71,25 @@ def threshFunction (image_dir_counting, countName, imagess,
         
         # Get image in red pixel only
         redImage = cv2.bitwise_and(img.copy(), img.copy(), mask = mask)
-        ##cv2.imwrite("during files/2_redImage.jpg", redImage)
         
 
         
         gray = cv2.cvtColor(redImage, cv2.COLOR_BGR2GRAY)
-        #cv2.imwrite((place+"/3_gray.jpg"), gray)
         blured = cv2.GaussianBlur(gray,(5,5),0)
-        #cv2.imwrite((place+"/4_blured.jpg"), blured)
         
 
-        ret, thresh = cv2.threshold(blured,1,255,cv2.THRESH_BINARY_INV)#+cv2.THRESH_OTSU)
+        ret, thresh = cv2.threshold(blured,1,255,cv2.THRESH_BINARY_INV)
         
         theImgTestAltThresh = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,3, 8)
             
-        #tempppp = cv2.bitwise_not(thresh)
         tempppp = thresh
-        #cv2.imwrite((place+"/5_thresh.jpg"), temp)
         
         
         kernel = np.ones((15,15),np.uint8)
         closing = cv2.morphologyEx(tempppp, cv2.MORPH_CLOSE, kernel)
-        #cv2.imwrite((place+"/6_closing.jpg"), closing)
-        
-        #cv2.imwrite("temp.jpg", closing)
         
         
         negative = cv2.bitwise_not(closing) # OR
-        #cv2.imwrite((place+"/7_negative.jpg"), negative)
         
         kernel = np.ones((15,15),np.uint8)
         closing2 = cv2.morphologyEx(negative, cv2.MORPH_CLOSE, kernel)
@@ -131,18 +100,16 @@ def threshFunction (image_dir_counting, countName, imagess,
 
         #saving all the pictures in individual folders from each step    
 
-        thingImage = imageUse.split("\\")
-        useThing = thingImage[len(thingImage)-1][0:len(thingImage[len(thingImage)-1])-4]
-        
-        locationForThis = "external\\detections\\"+  countName + "\\images\\thresholding"
+        endname = os.path.splitext(os.path.basename(imageUse))[0]
 
-        place = locationForThis + "\\"+ useThing
+        locationForThis = "external/detections/"+  countName + "/images/thresholding"
+
+        place = locationForThis + "/"+ endname
         print ("file paths of directories made:", place)
         try:
             os.mkdir(ntpath.abspath(place))
         except:
             print("skipped making new directories")
-        #os.replace(ntpath.abspath(place))
         cv2.imwrite((place+"/1_og.jpg"), img)
         if (image2_buttontest):
             cv2.imwrite((place+"/2_red_image.jpg"), redImage)
@@ -164,23 +131,18 @@ def threshFunction (image_dir_counting, countName, imagess,
 
         
         
-        trans = Image.open(place+"/7_myFinalUse.jpg")
+        trans = Image.open(place+"/7_my_final_use.jpg")
         trans.putalpha(75)
         
         layOver = Image.open(place+"/1_og.jpg")
         
         layOver.paste(trans, (0,0), mask=trans)
-        
-        #cv2.imwrite("during files/9_layerOver.jpg", layOver)
-        
-        #layOver.show()
-        
         layOver = layOver.save(place+"/8_layOver.jpg")
 
         if (not image1_buttontest):
             os.remove((place+"/1_og.jpg"))
         if (not image7_buttontest):
-            os.remove((place+"/7_myFinalUse.jpg"))
+            os.remove((place+"/7_my_final_use.jpg"))
         
         number_of_white_pix = cv2.countNonZero(myFinalUse)
         number_of_black_pix = np.sum(myFinalUse == 0)
@@ -191,13 +153,13 @@ def threshFunction (image_dir_counting, countName, imagess,
         mussel = round(number_of_black_pix/numPixPerMussle)
         
         print ("number of mussels in clumps: ", mussel)
-        
-        fileNameAry.append(useThing)
+
+        fileNameAry.append(endname)
         musselCountAry.append(mussel)
         blackPxlAry.append(number_of_black_pix)
 
-    locationForThis = "external\\detections\\"+  countName + "\\spreadsheets"
-    countSheet = pd.ExcelWriter(locationForThis + "\\" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
+    locationForThis = "external/detections/"+  countName + "/spreadsheets"
+    countSheet = pd.ExcelWriter(locationForThis + "/" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
     df = pd.DataFrame({'Image': fileNameAry, 'Clump Mussel Count': musselCountAry, 'Black Pixels': blackPxlAry})
     sf = styleframe.StyleFrame(df)
     sf.to_excel(excel_writer=countSheet, best_fit=["Image", "Clump Mussel Count", "Black Pixels"], sheet_name="Thresholding", columns_and_rows_to_freeze='B2', row_to_add_filters=0)

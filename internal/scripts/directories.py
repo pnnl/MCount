@@ -80,9 +80,3 @@ def new_training_directory (train_name):
         os.mkdir(ntpath.abspath(path))
     except:
         print("skipped /external/training")
-
-    path = cwd + "/external/training" + train_name
-    try:
-        os.mkdir(ntpath.abspath(path))
-    except:
-        print("skipped /external/training")

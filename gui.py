@@ -11,9 +11,9 @@ print("Open the README for complete app instructions.\n")
 
 time.sleep(1)
 
-import PyQt5.QtWidgets as qtw
-import PyQt5.QtGui as qtg
-import PyQt5.QtCore as qtc
+import PyQt6.QtWidgets as qtw
+import PyQt6.QtGui as qtg
+import PyQt6.QtCore as qtc
 
 #from PyQt5 import QtWidgets
 #from qtwidgets import AnimatedToggle
@@ -60,8 +60,8 @@ def defaultUI(window):
         window.setMinimumSize(400, 300)
         window.setMaximumSize(401, 301)
     else:
-        window.setMinimumSize(550, 375)
-        window.setMaximumSize(551, 376)
+        window.setMinimumSize(500, 350)
+        window.setMaximumSize(501, 351)
 
 
 class MainWindow(qtw.QWidget):
@@ -78,15 +78,15 @@ class MainWindow(qtw.QWidget):
         self.title_label = qtw.QLabel("MCount")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.title_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.title_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
-        self.title_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
         self.layout().addWidget(self.title_label)
         author_label = qtw.QLabel("By Lance Miller and Navaj Nune")
         author_label.setFont(qtg.QFont(cfg.default_font, 14))
-        author_label.setAlignment(qtc.Qt.AlignCenter)
-        author_label.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        author_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        author_label.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.layout().addWidget(author_label)
-        verticalSpacer = qtw.QSpacerItem(20, 15, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        verticalSpacer = qtw.QSpacerItem(20, 15, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.layout().addItem(verticalSpacer)
 
         # Creates run, train, and select model buttons within vertical layout
@@ -176,7 +176,7 @@ class CountWindow(qtw.QWidget):
         self.title_label = qtw.QLabel("Count")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
@@ -524,36 +524,36 @@ class CountWindow(qtw.QWidget):
         self.title_label.setParent(None)
         self.begin_button.setParent(None)
         self.past_counts_button.setParent(None)
+        self.back_button.setParent(None)
 
         # Adds a title label
         self.title_label = qtw.QLabel("View Past\nDetection Counts")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(self.title_label)
 
         # Creates a horizontal layout for the label and dropdown menu to reside in
         self.dropdown_layout = qtw.QHBoxLayout()
         self.dropdown_layout.setSpacing(10)
-        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.layout().addLayout(self.dropdown_layout)
         self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a past counts label 
         self.past_counts_label = qtw.QLabel(f"Past Count:")
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
-        self.past_counts_label.setSizePolicy(size_policy)
+        self.past_counts_label.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.past_counts_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.past_counts_label.setAlignment(qtc.Qt.AlignCenter)
+        self.past_counts_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.dropdown_layout.addWidget(self.past_counts_label)
         
         # Creates a dropdown menu of available counts
         self.past_counts_dropdown = qtw.QComboBox()
         self.past_counts_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.past_counts_dropdown.currentIndexChanged.connect(self.past_counts_dropdown_changed)
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        self.past_counts_dropdown.setSizePolicy(size_policy)
+        self.past_counts_dropdown.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.dropdown_layout.addWidget(self.past_counts_dropdown)
+        
 
         # Iterates through the detections
         if os.path.isdir(dirs.detections):
@@ -567,12 +567,14 @@ class CountWindow(qtw.QWidget):
                 self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
                 self.next_button.clicked.connect(self.next_once_selected)
                 self.layout().addWidget(self.next_button)
+                self.layout().addWidget(self.back_button)
             else:
                 self.past_counts_dropdown.addItem("No Previous Counts")
+                self.layout().addWidget(self.back_button)
         else:
             self.past_counts_dropdown.addItem("No Previous Counts")
-            
             self.layout().addWidget(self.back_button)
+            
 
     def past_counts_dropdown_changed(self,index):
         # Records the new selected model (count version) anytime the dropdown menu is changed
@@ -729,7 +731,7 @@ class TrainWindow (qtw.QWidget):
         self.title_label = qtw.QLabel("Train Model")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
@@ -863,33 +865,30 @@ class SelectWindow (qtw.QWidget):
         # Creates a label within layout
         self.title_label = qtw.QLabel("Select Model")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding)
-        self.title_label.setSizePolicy(size_policy)
+        self.title_label.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(self.title_label)
 
         # Creates a horizontal layout for the label and dropdown menu to reside in
         self.dropdown_layout = qtw.QHBoxLayout()
         self.dropdown_layout.setSpacing(10)
-        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        verticalSpacer = qtw.QSpacerItem(20, 30, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.layout().addLayout(self.dropdown_layout)
         self.layout().addSpacerItem(verticalSpacer)
         
         # Adds a current model label 
         self.model_label = qtw.QLabel(f"Current Model:")
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
-        self.model_label.setSizePolicy(size_policy)
+        self.model_label.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.model_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.model_label.setAlignment(qtc.Qt.AlignCenter)
+        self.model_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.dropdown_layout.addWidget(self.model_label)
         
         # Creates a dropdown menu of available models
         self.model_dropdown = qtw.QComboBox()
         self.model_dropdown.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.model_dropdown.currentIndexChanged.connect(self.model_dropdown_changed)
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        self.model_dropdown.setSizePolicy(size_policy)
+        self.model_dropdown.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         self.dropdown_layout.addWidget(self.model_dropdown)
 
         # Pulls models from modeldict.json and adds them to the dropdown
@@ -906,8 +905,7 @@ class SelectWindow (qtw.QWidget):
         # Creates a file dialog button
         file_button = qtw.QPushButton("Add Model Folder")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        file_button.setSizePolicy(size_policy)
+        file_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
         
@@ -919,16 +917,14 @@ class SelectWindow (qtw.QWidget):
         # Creates a save button
         save_button = qtw.QPushButton("Save")
         save_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        save_button.setSizePolicy(size_policy)
+        save_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         save_button.clicked.connect(self.save_button_clicked)
         self.menu_split.addWidget(save_button)
 
         # Creates a back button
         back_button = qtw.QPushButton("Cancel")
         back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        back_button.setSizePolicy(size_policy)
+        back_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         back_button.clicked.connect(self.back_button_clicked)
         self.menu_split.addWidget(back_button)
 
@@ -992,7 +988,7 @@ class SettingsWindow(qtw.QWidget):
         self.title_label = qtw.QLabel("Settings")
         self.title_label.setFont(qtg.QFont(cfg.default_font, cfg.header_font_size))
         self.title_label.setStyleSheet(f'color: {cfg.header_color}; font-weight: bold;')
-        self.title_label.setAlignment(qtc.Qt.AlignCenter)
+        self.title_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.layout().addWidget(self.title_label)
 
         # Creates split for toggle and text
@@ -1003,8 +999,8 @@ class SettingsWindow(qtw.QWidget):
         #text
         text_size = qtw.QLabel("Select toggle for small screen size mode. ")
         text_size.setFont(qtg.QFont(cfg.default_font, 14))
-        text_size.setAlignment(qtc.Qt.AlignCenter)
-        text_size.setSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
+        text_size.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        text_size.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         menu_split.addWidget(text_size)
 
         # toggle for small/ large screen adjustments
@@ -1020,8 +1016,7 @@ class SettingsWindow(qtw.QWidget):
         # Creates a back button
         back_button = qtw.QPushButton("Back")
         back_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        size_policy = qtw.QSizePolicy(qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Fixed)
-        back_button.setSizePolicy(size_policy)
+        back_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         back_button.clicked.connect(self.back_button_clicked)
         self.layout().addWidget(back_button)
 
@@ -1045,4 +1040,4 @@ app = qtw.QApplication(sys.argv)
 mw = MainWindow()
 
 # Runs the app 
-app.exec_()
+app.exec()
