@@ -446,13 +446,13 @@ class CountWindow(qtw.QWidget):
         self.next_button.setParent(None)
 
         # Creates an open pictures button
-        self.open_pics = qtw.QPushButton("Open Detection Pictures")
+        self.open_pics = qtw.QPushButton("Open Detection Images")
         self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.selection))
         self.layout().addWidget(self.open_pics)
 
         # Creates an open excell button
-        self.open_sheet = qtw.QPushButton("Open Excel Count")
+        self.open_sheet = qtw.QPushButton("Open Count Spreadsheet")
         self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.selection))
         self.layout().addWidget(self.open_sheet)
