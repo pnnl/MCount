@@ -4,7 +4,6 @@ MCount is a GUI App built with PyQt6 that streamlines object detection. It utili
 ## Installation
 TODO
 
-
 ## How to Use MCount
 You can minimize MCount anytime by clicking the - near the top right corner.
  
@@ -16,7 +15,7 @@ You can customize certain GUI elements (such as font or color) in the config.py 
  
 The main menu displays MCount's five features as buttons: Count, Train Model, Select Model, Help, and Quit. 
 
-### Count
+## Count
 After clicking the Count button, the main menu will disappear and the Count window will open. 
 
 You may click "Begin New Count" to start a new detection. You may click "View Past Detections" to view detection images or spreadsheets from previous detections. If you'd like to return to the main menu, click "Cancel". 
@@ -43,7 +42,7 @@ Once you're done with viewing your detection images or spreadsheets, click "Main
 
 **If you're running a mussel larvae detection, keep both boxes checked.
 
-### Train Model
+## Train Model
 After clicking the Train button, the main menu will disappear and the Train window will open.
 
 In order to train your selected model, you must add your training data by clicking "Select Image Configs". A file dialog will open and you must select a folder in which both the original images AND matching labeled image configs reside. Otherwise, click "Cancel" to return to the Main Menu.
@@ -58,7 +57,7 @@ Once the training is complete, you may close the terminal and test your updated 
 
 *You can check if the training is complete by typing in the terminal. If no letters show up, the training is not done. If letters do show up, the training ended (some way or another). 
 
-### Select Model
+## Select Model
 After clicking the Select Model button, the main menu will disappear and the Select Model window will open. 
 
 The current model will be displayed at the center of the screen. If you haven't changed the model yet, it should be "MCount Default model". The MCount default model is built to only detect solo mussel larvae. 
@@ -70,6 +69,8 @@ After clicking "Select model folder from file explorer", a file dialog will open
 After selecting the model folder, a text input dialog will pop up. Type the name of your model in the field and click OK. This name simply exists for future reference, so make it recognizable. 
 
 After entering the name of the model, the current model will change to the one you just selected. Now this model will be used whenever you train or run detections in MCount.*
+
+If you've changed the path to an added model, it will not work. To remove or change the path to an added model, remove it from the dict in ~/MCount/internal/resources/modeldict.json
 
 *Currently, only TensorFlow 2 Detection Model Zoo models are compatible with MCount. 
 

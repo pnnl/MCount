@@ -283,7 +283,7 @@ class CountWindow(qtw.QWidget):
             # Creates a run button
             self.next_button = qtw.QPushButton("Run Model")
             self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.next_button.clicked.connect(self.select_thresh_images)
+            self.next_button.clicked.connect(self.name_count)
             self.layout().addWidget(self.next_button)
             
             # Adds the back button
@@ -307,9 +307,15 @@ class CountWindow(qtw.QWidget):
         # If the selection checkbox is checked, change the next button text 
         if self.img_selection_checkbox.isChecked():
             self.next_button.setText("Next")
+            self.next_button.clicked.disconnect(self.name_count)
+            self.next_button.clicked.connect(self.select_thresh_images)
+            
         # If the selection checkbox is checked, change the next button text 
         if not self.img_selection_checkbox.isChecked():
             self.next_button.setText("Run Model")
+            self.next_button.clicked.disconnect(self.select_thresh_images)
+            self.next_button.clicked.connect(self.name_count)
+
 
     def name_count (self):
         # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
@@ -332,11 +338,23 @@ class CountWindow(qtw.QWidget):
                 name_of_count = f"Unnamed Detection {value}"
             except:
                 name_of_count = f"Unnamed Detection 1"
+            # Removes widgets from the layout
+            thresh_checkbox.setParent(None)
+            self.img_selection_checkbox.setParent(None)
+            self.next_button.setParent(None)
+
+            self.run_button_clicked()
         if name and self.done:
             name_of_count = name
+            # Removes widgets from the layout
+            thresh_checkbox.setParent(None)
+            self.img_selection_checkbox.setParent(None)
+            self.next_button.setParent(None)
+
+            self.run_button_clicked()
+        
         
     def select_thresh_images(self):
-        if thresh_checkbox.checkState() and self.img_selection_checkbox.checkState():
             # Clears previous app elements
             thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
@@ -405,16 +423,6 @@ class CountWindow(qtw.QWidget):
             # Fixes location of start button
             self.layout().addWidget(self.back_button)
 
-        else:
-            self.name_count()
-            if self.done:
-                # Removes widgets from the layout
-                thresh_checkbox.setParent(None)
-                self.img_selection_checkbox.setParent(None)
-                self.next_button.setParent(None)
-
-                self.run_button_clicked()
-
     def get_rid_of_checkboxes(self):
         self.name_count()
         if self.done:
@@ -438,27 +446,6 @@ class CountWindow(qtw.QWidget):
             
             # Begins the detections
             self.run_button_clicked()
-
-    def next_once_selected(self, index):
-        self.title_label.setText("Past Counts")
-        self.back_button.setText("Main Menu")
-
-        self.next_button.setParent(None)
-
-        # Creates an open pictures button
-        self.open_pics = qtw.QPushButton("Open Detection Images")
-        self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.selection))
-        self.layout().addWidget(self.open_pics)
-
-        # Creates an open excell button
-        self.open_sheet = qtw.QPushButton("Open Count Spreadsheet")
-        self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.selection))
-        self.layout().addWidget(self.open_sheet)
-
-        # Adds the back button
-        self.layout().addWidget(self.back_button)
 
     def run_button_clicked(self):
         # Removes widgets from the layout
@@ -501,7 +488,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.open_pics)
 
         # Creates an open excel button
-        self.open_sheet = qtw.QPushButton("Open Excel Count")
+        self.open_sheet = qtw.QPushButton("Open Count Spreadsheet")
         self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(name_of_count))
         self.layout().addWidget(self.open_sheet)
@@ -510,7 +497,7 @@ class CountWindow(qtw.QWidget):
         self.layout().addWidget(self.back_button)
 
     def open_pics_button_clicked (self, count_name):
-        # Opens the images pathWE 
+        # Opens the images path 
         path = dirs.detections + "/" + count_name + "/images"
         os.startfile(path)
 
@@ -575,6 +562,26 @@ class CountWindow(qtw.QWidget):
             self.past_counts_dropdown.addItem("No Previous Counts")
             self.layout().addWidget(self.back_button)
             
+    def next_once_selected(self, index):
+        self.title_label.setText("Past Counts")
+        self.back_button.setText("Main Menu")
+
+        self.next_button.setParent(None)
+
+        # Creates an open pictures button
+        self.open_pics = qtw.QPushButton("Open Detection Images")
+        self.open_pics.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_pics.clicked.connect(lambda: self.open_pics_button_clicked(self.selection))
+        self.layout().addWidget(self.open_pics)
+
+        # Creates an open excel button
+        self.open_sheet = qtw.QPushButton("Open Count Spreadsheet")
+        self.open_sheet.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.open_sheet.clicked.connect(lambda: self.open_sheet_button_clicked(self.selection))
+        self.layout().addWidget(self.open_sheet)
+
+        # Adds the back button
+        self.layout().addWidget(self.back_button)
 
     def past_counts_dropdown_changed(self,index):
         # Records the new selected model (count version) anytime the dropdown menu is changed
@@ -632,7 +639,7 @@ class DetectionThread(qtc.QThread):
         # Updates the percentage of the progress bar
         percent1 = random.randint(9, 14)
         for i in range(0, percent1):
-            time.sleep(0.01)
+            time.sleep(0.05)
             total_percent += 1
             self.any_signal.emit(total_percent)
             
@@ -640,9 +647,9 @@ class DetectionThread(qtc.QThread):
         tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/segmentation")
 
         # Updates the percentage of the progress bar
-        percent2 = random.randint(14, 21)
+        percent2 = random.randint(25, 40)
         for i in range(0, percent2):
-            time.sleep(0.01)
+            time.sleep(0.05)
             total_percent += 1
             self.any_signal.emit(total_percent)
 
@@ -654,12 +661,12 @@ class DetectionThread(qtc.QThread):
         # Updates the percentage of the progress bar
         percent3 = random.randint(27, 40)
         for i in range(0, percent3):
-            time.sleep(0.01)
+            time.sleep(0.05)
             total_percent += 1
             self.any_signal.emit(total_percent)
 
         # Checks if the user selected mussel thresholding or not
-        if (thresh_checkbox.checkState()):
+        if thresh_checkbox.checkState():
             try:
                 thresh_count_and_names = thresholding.threshFunction(image_dir, name_of_count, images_list[0],
                                             CountWindow.image1_buttontest.checkState(),
@@ -706,7 +713,7 @@ class DetectionThread(qtc.QThread):
         # Takes the first sheet generated by directory.py and makes it the totals sheet
         full_path = dirs.detections + "/" + name_of_count + "/spreadsheets/overall_counts.xlsx"
         workbook = openpyxl.load_workbook(full_path)
-        sheet1 = workbook.get_sheet_by_name("Sheet1")
+        sheet1 = workbook["Sheet1"]
         sheet1.title = "Totals"
         workbook.save(full_path)
 
