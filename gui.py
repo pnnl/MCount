@@ -345,7 +345,9 @@ class CountWindow(qtw.QWidget):
 
             self.run_button_clicked()
         if name and self.done:
+            # Sets the name
             name_of_count = name
+            
             # Removes widgets from the layout
             thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
