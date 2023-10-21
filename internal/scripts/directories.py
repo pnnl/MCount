@@ -9,6 +9,7 @@ resources = cwd + "/internal/resources"
 dict = cwd + "/internal/resources/modeldict.json"
 training = cwd + "/external/training"
 scripts = cwd + "/internal/scripts"
+model = cwd + "/internal/model"
 
 def new_detection_directory(count_name):
     # Creates the neccessary directories to organize the different parts of detection and counting and will skip making the directory if it already exists

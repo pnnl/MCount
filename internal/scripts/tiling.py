@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 # READ ME
 # Before anything, you need to create some folders inside the TFODCourse>Tensorflow>workspace>images directory. You will probably want to
 # perform multiple analyses on your images, changing some parameters and checking things. I name each analysis folder by an Instance number to 
@@ -25,25 +19,30 @@ import os
 # a folder called OD13 inside my user folder, but you may have placed yours somewhere else when you downloaded the github files and
 # activated the virtual environment.
 def tile(input_image_list, output_tiles_dir):
+    # Returns the image resolution
     # Defines the starting and ending points of the tiling, and how big you want the tiles to be. You can overlap tiles by tuning the interval 
     # and step values. If you don't want the tiles to overlap but want to change the tile size, then change both the interval and the step.
-    Ax = 0    # x axis where you want to start tiling; usually 0 
-    Bx = 2170  # x axis where you want to stop tiling. It will stop tiling one interval before this value
-    Ix = 310   # x axis interval
-    Ixs = 310 # x axis loop step
-    Ay = 0    # y axis where you want to start tiling; usually 0 
-    By = 2170  # y axis where you want to stop tiling. It will stop tiling one interval before this value
-    Iy = 310   # y axis interval
-    Iys = 310 # y axis loop step
 
     for pic in input_image_list: # Loop through the photos
-        name = str(pic) 
+        name = str(pic)
         base_name = os.path.basename(name) # Gets rid of the folder path part of the coupon file name.
         name_only = os.path.splitext(base_name)[0] # Gets rid of the .png part of the coupon file name.
         folder_path = os.path.join(output_tiles_dir, name_only) # Creates the full folder path name for the individual coupon name at this step in the loop.
+        
+        # Scans the image and returns the height and width
+        im = cv2.imread(name) 
+        dimensions = im.shape
+
+        Ax = 0    # x axis where you want to start tiling; usually 0 
+        Bx = dimensions[1]  # x axis where you want to stop tiling. It will stop tiling one interval before this value
+        Ix = int(dimensions[1] / 7)   # x axis interval
+        Ixs = int(dimensions[1] / 7) # x axis loop step
+        Ay = 0    # y axis where you want to start tiling; usually 0 
+        By = dimensions[0] # y axis where you want to stop tiling. It will stop tiling one interval before this value
+        Iy = int(dimensions[0] / 7)  # y axis interval
+        Iys = int(dimensions[0] / 7) # y axis loop step
         if not os.path.exists(folder_path):
             os.mkdir(folder_path) # Creates the folder
-        im = cv2.imread(name) # Read the coupon image 
         for x in range(Ax,Bx,Ixs):  # sets range for tiling, as defined above, in the x axis
             for y in range(Ay,By,Iys):  # sets range for tiling, as defined above, in the y axis
                 tile_coord = '%04d %04d ' % (x,y) # converts the tile coordinates to a string so it can be used in the file name

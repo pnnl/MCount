@@ -135,7 +135,7 @@ def detect(model_path, name_of_count, labelmap_path):
                 box2 = coordinates_of_boxes_size_filtered__for_counting
             
                     
-    # # Convert the filtered list into a format that is equivalent to the detections['detection_boxes'] format. This is only necessary if you are trying to display ONLY the filtered detection boxes, not the original set of detection boxes.
+    # Convert the filtered list into a format that is equivalent to the detections['detection_boxes'] format. This is only necessary if you are trying to display ONLY the filtered detection boxes, not the original set of detection boxes.
     # The detection_boxes coordinates are in the format of: [y1,x1,y2,x2]
                 coordinates_of_boxes_size_filtered_for_visualization = [0,0,0,0]
                 for h in coordinates_of_boxes_size_filtered__for_counting:
@@ -146,11 +146,10 @@ def detect(model_path, name_of_count, labelmap_path):
                     detections['detection_scores']=np.array([0,0,0,0])   # I have to do this because when I filter the detection boxes, I'm not filtering the detection scores, and this becomes a problem when I try to visualize a tile that has had all of the boxes filtered away, leaving only a single [0,0,0,0] array behind, and this is only a problem when there are scores that are above the minimum score threshold but all the detection boxes have been filtered out, in which case the matrix shape is [4,] instead of [1,x] so I just replace the scores array with a blank dummy array. It's a sloppy fix and I should probabbly just filter the detection scores and classes the same as I filter the deteciton boxes, but this seems to work fine.
                     
 
-    ## Remove overlapping boxes
+    # Remove overlapping boxes
                 dict = {'P':[],
                         'Q':[]}   # Instatiate a list that will be the list of boxes that overlap. P and Q are the indeces of the boxes that overlap. For example, if the first row lists 2 and 5, that means boxes 2 and 5 overlap.
                 df_overlap = pd.DataFrame(dict) # Instantiate a dataframe from the dict list above.
-                df_good = pd.DataFrame(dict) # Instantiate a dataframe from the dict list above.
                 cushion = 0.02 # !!!! **** This is the overlap parameter. Larger value allows more overlap. I usually use 0.2. I thought this was a multiple of the total tile size (320 px) but it doesn't quite match up.
                         
                 for p in range(len(box2)):

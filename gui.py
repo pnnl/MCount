@@ -44,6 +44,21 @@ os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
 
+# Opens the model dict
+with open(dirs.dict, "r") as f:
+    model_dict = json.load(f)
+try:
+    # Checks if this is the first time the user has opened this dict
+    if model_dict["first_time"]:
+        model_dict[dirs.model] = "MCount Mussel Detector"
+        model_dict["current_model_directory"] = dirs.model
+        model_dict.pop("first_time")
+
+        with open(dirs.dict, "w") as f:
+            json.dump(model_dict, f, indent=4)
+except:
+    pass
+
 def defaultUI(window):
     # Adds a title 
     window.setWindowTitle("MCount")
@@ -336,6 +351,7 @@ class CountWindow(qtw.QWidget):
                 else:
                     value = 1
                 name_of_count = f"Unnamed Detection {value}"
+                
             except:
                 name_of_count = f"Unnamed Detection 1"
             # Removes widgets from the layout
@@ -458,6 +474,13 @@ class CountWindow(qtw.QWidget):
         # Changes title text
         self.title_label.setText("Count in Progress...")
         
+        # Adds a smaller text bar
+        self.process_label = qtw.QLabel("Creating directories...")
+        self.process_label.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.process_label.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        self.process_label.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
+        self.layout().addWidget(self.process_label)
+        
         # Adds a progress bar 
         self.progress_bar = qtw.QProgressBar()
         self.progress_bar.setMinimum(0)
@@ -469,15 +492,57 @@ class CountWindow(qtw.QWidget):
         self.detection.start()
         self.detection.any_signal.connect(self.loading)
         self.detection.finished.connect(self.count_complete)
+        
+        # Sets the beginning percent for the progress bar
+        self.current_percent = 0
 
     # This function is run any time a signal is emitted from the detection thread
-    def loading (self, percent):
-        self.progress_bar.setValue(percent)
+    def loading (self, percent, process):
+        if process == 1:
+            # Updates the process label
+            self.process_label.setText("Cropping images...")
+
+            # Smoothly increases the progress bar
+            for i in range(0, percent):
+                self.current_percent += 1
+                time.sleep(0.05)
+                self.progress_bar.setValue(self.current_percent)
+        
+        if process == 2:
+            # Updates the process label
+            self.process_label.setText("Running AI detections...")
+
+            # Smoothly increases the progress bar
+            for i in range(0, percent):
+                self.current_percent += 1
+                time.sleep(0.05)
+                self.progress_bar.setValue(self.current_percent)
+        
+        if process == 3:
+            # Updates the process label
+            self.process_label.setText("Evaluating colors...")
+
+            # Smoothly increases the progress bar
+            for i in range(0, percent):
+                self.current_percent += 1
+                time.sleep(0.05)
+                self.progress_bar.setValue(self.current_percent)
+        
+        if process == 4:
+            # Updates the process label
+            self.process_label.setText("Wrapping up...")
+
+            # Smoothly increases the progress bar
+            for i in range(0, percent):
+                self.current_percent += 1
+                time.sleep(0.05)
+                self.progress_bar.setValue(self.current_percent)
 
     def count_complete(self):
         time.sleep(1)
         
         self.progress_bar.setParent(None)
+        self.process_label.setParent(None)
 
         # Changes the title and cancel button to fit a "complete" dialog
         self.title_label.setText("Count\n Complete")
@@ -601,7 +666,7 @@ class CountWindow(qtw.QWidget):
 # Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the GUI
 class DetectionThread(qtc.QThread):
     # Defines which signals are transmitted to the loading function
-    any_signal = qtc.pyqtSignal(int)
+    any_signal = qtc.pyqtSignal(int, int)
 
     def list_image (self, image_dir_counting):
         # Initializes the list of image paths
@@ -639,21 +704,13 @@ class DetectionThread(qtc.QThread):
         dirs.new_detection_directory(name_of_count)
 
         # Updates the percentage of the progress bar
-        percent1 = random.randint(9, 14)
-        for i in range(0, percent1):
-            time.sleep(0.05)
-            total_percent += 1
-            self.any_signal.emit(total_percent)
+        self.any_signal.emit(20, 1)
             
         # Breaks images into tiles
         tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/segmentation")
 
         # Updates the percentage of the progress bar
-        percent2 = random.randint(25, 40)
-        for i in range(0, percent2):
-            time.sleep(0.05)
-            total_percent += 1
-            self.any_signal.emit(total_percent)
+        self.any_signal.emit(50, 2)
 
         # Runs detections
         with open (dirs.dict, "r") as f:
@@ -661,11 +718,7 @@ class DetectionThread(qtc.QThread):
         seg_count_and_names = detections.detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=labelmap)
 
         # Updates the percentage of the progress bar
-        percent3 = random.randint(27, 40)
-        for i in range(0, percent3):
-            time.sleep(0.05)
-            total_percent += 1
-            self.any_signal.emit(total_percent)
+        self.any_signal.emit(20, 3)
 
         # Checks if the user selected mussel thresholding or not
         if thresh_checkbox.checkState():
@@ -706,11 +759,7 @@ class DetectionThread(qtc.QThread):
             total_count_array = seg_count_and_names[0]
         
         # Updates the percentage of the progress bar
-        percent4 = 100 - percent1 - percent2 - percent3
-        for i in range(0, percent4):
-            time.sleep(0.01)
-            total_percent += 1
-            self.any_signal.emit(total_percent)
+        self.any_signal.emit(10, 4)
 
         # Takes the first sheet generated by directory.py and makes it the totals sheet
         full_path = dirs.detections + "/" + name_of_count + "/spreadsheets/overall_counts.xlsx"
