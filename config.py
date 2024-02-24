@@ -1,4 +1,4 @@
-# ONLY EDIT THIS FILE WHEN THE APP IS CLOSED
+# EDIT THIS FILE ONLY WHEN THE APP IS CLOSED
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Set to True if you are using MCount on a small monitor or laptop

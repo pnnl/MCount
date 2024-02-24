@@ -18,7 +18,7 @@ from colorama import *
 from termcolor import * 
 from pyfiglet import *
 
-def detect(model_path, name_of_count, labelmap_path):
+def tf_detect(model_path, name_of_count, labelmap_path):
     print(f"\nBeginning detection named {name_of_count}...")
     print("----------------------------------------------------\n")
 
@@ -228,7 +228,7 @@ def detect(model_path, name_of_count, labelmap_path):
     writer = pd.ExcelWriter(excel_path, mode="a", engine = "openpyxl")
     # write dataframe to excel
     sf = styleframe.StyleFrame(df_coupon_count)
-    sf.to_excel(excel_writer=writer, sheet_name="Segmentation", best_fit=["Image", "Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
+    sf.to_excel(excel_writer=writer, sheet_name="Segmentation", best_fit=["Image", "Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0, index=False)
     # save the excel
     writer.close()
     print('\n DataFrame successfully written to Excel File.\n')
@@ -237,3 +237,6 @@ def detect(model_path, name_of_count, labelmap_path):
     time.sleep(3)
 
     return [total_sum_array, names_array]
+
+
+
