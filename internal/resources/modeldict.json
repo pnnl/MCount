@@ -1,4 +1,4 @@
 {
-    "C:/Users/mill286/Desktop/Mussel-Counting-AI-App/internal/model": "MCount Mussel Detector",
-    "current_model_directory": "C:/Users/mill286/Desktop/Mussel-Counting-AI-App/internal/model"
+    "C:/Users/mill286/Desktop/Mussel-Counting-AI-App/internal/model/official_model.pt": "MCount Mussel Detector",
+    "current_model_directory": "C:/Users/mill286/Desktop/Mussel-Counting-AI-App/internal/model/official_model.pt"
 }

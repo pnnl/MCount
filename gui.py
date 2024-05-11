@@ -15,9 +15,6 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtGui as qtg
 import PyQt6.QtCore as qtc
 
-#from PyQt5 import QtWidgets
-#from qtwidgets import AnimatedToggle
-
 import json
 import sys
 import os
@@ -33,7 +30,7 @@ import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
 import internal.scripts.directories as dirs
-import internal.scripts.detections as detections
+import internal.scripts.yolo_detect as yd
 
 # Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
@@ -695,7 +692,7 @@ class DetectionThread(qtc.QThread):
         self.any_signal.emit(20, 1)
             
         # Breaks images into tiles
-        tiling.no_tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/segmentation")
+        tiling.no_tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/bounding")
 
         # Updates the percentage of the progress bar
         self.any_signal.emit(50, 2)
@@ -703,7 +700,7 @@ class DetectionThread(qtc.QThread):
         # Runs detections
         with open (dirs.dict, "r") as f:
             model_dict = json.load(f)
-        seg_count_and_names = detections.tf_detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=labelmap)
+        seg_count_and_names = yd.yolo_detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count)
 
         # Updates the percentage of the progress bar
         self.any_signal.emit(20, 3)
@@ -757,6 +754,8 @@ class DetectionThread(qtc.QThread):
         workbook.save(full_path)
 
         # Creates a pandas dataframe with the totals, stylizes it, and then adds it to the excel spreadsheet
+        print(len(images_list[1]))
+        print(len(total_count_array))
         countSheet = pd.ExcelWriter(full_path, mode="a", engine='openpyxl', if_sheet_exists='replace')
         df = pd.DataFrame({"Image": images_list[1], "Total Count": total_count_array})
         sf = styleframe.StyleFrame(df)
@@ -945,11 +944,11 @@ class SelectWindow (qtw.QWidget):
         model_name = model_dict[directory]
         self.model_dropdown.addItem(model_name)
         for item in values[1:]:
-            if item != model_name:
+            if item != model_name or item != directory:
                 self.model_dropdown.addItem(item)
         
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Add Model Folder")
+        file_button = qtw.QPushButton("Add Model File")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         file_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         file_button.clicked.connect(self.file_button_clicked)
@@ -981,7 +980,7 @@ class SelectWindow (qtw.QWidget):
     
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
-        self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
+        self.folderpath, _ = qtw.QFileDialog.getOpenFileName(self, 'Select Model File', cfg.initial_directory, "PyTorch Model File (*.pt)")
         with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
         # Checks if a folder was returned and if the folder is already in modeldict.json
