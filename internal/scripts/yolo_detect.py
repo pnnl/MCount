@@ -12,17 +12,12 @@ def yolo_detect(model_path, name_of_count):
     input_dir = cwd + "/external/detections/" + name_of_count + "/images/bounding"
     output_dir = cwd + "/external/detections/" + name_of_count + "/images/bounding"
 
-    conf = 0.25
+    conf = 0.35
     model = YOLO(model_path)
 
     names_array = []
     total_sum_array = []
     for sub_dir in os.listdir(input_dir):
-        print(sub_dir)
-        print(sub_dir)
-        print(sub_dir)
-        print(sub_dir)
-        print(sub_dir)
         print(os.path.join(input_dir, sub_dir))
         count = 0
         for img in Path(os.path.join(input_dir, sub_dir)).glob("*.png"):
