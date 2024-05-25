@@ -11,7 +11,7 @@ training = cwd + "/external/training"
 scripts = cwd + "/internal/scripts"
 model = cwd + "/internal/model/official_model.pt"
 
-def new_detection_directory(count_name):
+def new_detection_directory(count_name, thresholding):
     # Creates the neccessary directories to organize the different parts of detection and counting and will skip making the directory if it already exists
     path = cwd + "/external"
     try:
@@ -45,12 +45,12 @@ def new_detection_directory(count_name):
     except:
         print("skipped")
 
-    
-    path = cwd + "/external/detections/"+  count_name + "/images/thresholding"
-    try:
-        os.mkdir(ntpath.abspath(path))
-    except:
-        print("skipped")
+    if thresholding:
+        path = cwd + "/external/detections/"+  count_name + "/images/thresholding"
+        try:
+            os.mkdir(ntpath.abspath(path))
+        except:
+            print("skipped")
 
     
     path = cwd + "/external/detections/"+  count_name + "/spreadsheets"
