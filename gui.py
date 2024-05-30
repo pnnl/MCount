@@ -798,10 +798,10 @@ class TrainWindow (qtw.QWidget):
         
     def yaml_button_clicked(self):
         # Opens file explorer to choose images
-        self.yaml = qtw.QFileDialog.getOpenFileName(self, "Open Training Config File", cfg.initial_directory, "YAML file (*.yaml)")
+        self.yaml, done = qtw.QFileDialog.getOpenFileName(self, "Open Training Config File", cfg.initial_directory, "YAML file (*.yaml)")
 
         # Checks if images were chosen
-        if self.yaml:
+        if self.yaml != "" and done:
             self.yaml_button.setParent(None)
             self.back_button.setParent(None)
             self.train_button = qtw.QPushButton("Begin Model Training")
@@ -813,31 +813,32 @@ class TrainWindow (qtw.QWidget):
     def train_button_clicked(self):
         self.epochs, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Amount of epochs for this training:')
         if self.epochs != "" and done:
+            print(self.epochs)
             self.pxsize, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Pixel size of the images used for this training (e.g. 640):')
             
             if self.pxsize != "" and done:
+                print(self.pxsize)
                 self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name for this training:')
 
                 if self.name != "" and done:
-                    
+                    print(self.name)
+
                     # Closes the window
                     self.close()
                     
-                    # Sets up training directory
-                    dirs.new_training_directory(train_name=self.name)
-                    
+                    dirs.new_training_directory()
+
                     with open(dirs.dict, "r") as f:
                         model_dict = json.load(f)
                         current_model = model_dict["current_model_directory"]
 
-                    yt.new_train(model_path=current_model, yaml=self.yaml, loops=self.epochs, img_size=self.pxsize)
+                    yt.new_train(model_path=current_model, yaml=self.yaml, loops=self.epochs, img_size=self.pxsize, name=self.name)
     
     def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
-
 
 class SelectWindow (qtw.QWidget): 
     def __init__(self):
