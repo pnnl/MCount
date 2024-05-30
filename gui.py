@@ -15,15 +15,10 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtGui as qtg
 import PyQt6.QtCore as qtc
 
-#from PyQt5 import QtWidgets
-#from qtwidgets import AnimatedToggle
-
 import json
 import sys
 import os
 import re
-import subprocess
-import textwrap
 import pandas as pd
 import styleframe
 from pathlib import Path
@@ -33,7 +28,8 @@ import config as cfg
 import internal.scripts.tiling as tiling
 import internal.scripts.thresholding as thresholding
 import internal.scripts.directories as dirs
-import internal.scripts.detections as detections
+import internal.scripts.yolo_detect as yd
+import internal.scripts.yolo_train as yt
 
 # Gets the current working directory and replaces the backslashes to prevent parsing issues later on
 cwd = (os.getcwd()).replace("\\", "/")
@@ -49,8 +45,8 @@ with open(dirs.dict, "r") as f:
 try:
     # Checks if this is the first time the user has opened this dict
     if model_dict["first_time"]:
-        model_dict[dirs.model] = "MCount Mussel Detector"
         model_dict["current_model_directory"] = dirs.model
+        model_dict[dirs.model] = "MCount Mussel Detector"
         model_dict.pop("first_time")
 
         with open(dirs.dict, "w") as f:
@@ -274,14 +270,15 @@ class CountWindow(qtw.QWidget):
             self.back_button.setParent(None)
 
             # Creates checkboxes for thresholding and spreadsheet
-            global thresh_checkbox
-            thresh_checkbox = qtw.QCheckBox("Run Thresholding")
-            thresh_checkbox.setChecked(True)
-            thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
-            self.layout().addWidget(thresh_checkbox)
+            self.thresh_checkbox = qtw.QCheckBox("Run Thresholding")
+            global run_thresh
+            run_thresh = False
+            # self.thresh_checkbox.setChecked(True)
+            self.thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
+            self.layout().addWidget(self.thresh_checkbox)
             self.img_selection_checkbox = qtw.QCheckBox("Download Specific Thresholding Images")
             self.img_selection_checkbox.stateChanged.connect(self.select_checkbox_changed)
-            self.layout().addWidget(self.img_selection_checkbox)
+            # self.layout().addWidget(self.img_selection_checkbox)
 
             # Creates a run button
             self.next_button = qtw.QPushButton("Run Model")
@@ -295,13 +292,14 @@ class CountWindow(qtw.QWidget):
     # This function is run anytime the thresholding checkbox is checked or unchecked
     def thresh_checkbox_changed(self):
         # If the checkbox is checked, another checkbox is created for the user to select specific thresholding images
-        if thresh_checkbox.isChecked():
+        if self.thresh_checkbox.isChecked():
+            run_thresh = True
             self.layout().addWidget(self.img_selection_checkbox)
             self.layout().addWidget(self.next_button)
             self.layout().addWidget(self.back_button)
 
         # If the thresholding checkbox is unchecked, the selection checkbox is removed
-        if not thresh_checkbox.isChecked():
+        if not self.thresh_checkbox.isChecked():
             self.img_selection_checkbox.setChecked(False)
             self.img_selection_checkbox.setParent(None)
 
@@ -343,7 +341,7 @@ class CountWindow(qtw.QWidget):
             except:
                 name_of_count = f"Unnamed Detection 1"
             # Removes widgets from the layout
-            thresh_checkbox.setParent(None)
+            self.thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
             self.next_button.setParent(None)
 
@@ -353,7 +351,7 @@ class CountWindow(qtw.QWidget):
             name_of_count = name
             
             # Removes widgets from the layout
-            thresh_checkbox.setParent(None)
+            self.thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
             self.next_button.setParent(None)
 
@@ -362,7 +360,7 @@ class CountWindow(qtw.QWidget):
         
     def select_thresh_images(self):
             # Clears previous app elements
-            thresh_checkbox.setParent(None)
+            self.thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
             self.next_button.setParent(None)
 
@@ -455,7 +453,7 @@ class CountWindow(qtw.QWidget):
 
     def run_button_clicked(self):
         # Removes widgets from the layout
-        thresh_checkbox.setParent(None)
+        self.thresh_checkbox.setParent(None)
         self.back_button.setParent(None)
         self.next_button.setParent(None)
 
@@ -689,13 +687,13 @@ class DetectionThread(qtc.QThread):
         images_list = self.list_image(image_dir)
 
         # Creates required directories
-        dirs.new_detection_directory(name_of_count)
+        dirs.new_detection_directory(name_of_count, run_thresh)
 
         # Updates the percentage of the progress bar
         self.any_signal.emit(20, 1)
             
         # Breaks images into tiles
-        tiling.no_tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/segmentation")
+        tiling.tile(input_image_list=images_list[0], output_tiles_dir=f"{dirs.detections}/{name_of_count}/images/bounding")
 
         # Updates the percentage of the progress bar
         self.any_signal.emit(50, 2)
@@ -703,13 +701,14 @@ class DetectionThread(qtc.QThread):
         # Runs detections
         with open (dirs.dict, "r") as f:
             model_dict = json.load(f)
-        seg_count_and_names = detections.tf_detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count, labelmap_path=labelmap)
+        seg_count_and_names = yd.yolo_detect(model_path=model_dict["current_model_directory"], name_of_count=name_of_count)
 
         # Updates the percentage of the progress bar
         self.any_signal.emit(20, 3)
 
         # Checks if the user selected mussel thresholding or not
-        if thresh_checkbox.checkState():
+        if run_thresh:
+            print("DETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\n")
             try:
                 thresh_count_and_names = thresholding.threshFunction(image_dir, name_of_count, images_list[0],
                                             CountWindow.image1_buttontest.checkState(),
@@ -757,6 +756,8 @@ class DetectionThread(qtc.QThread):
         workbook.save(full_path)
 
         # Creates a pandas dataframe with the totals, stylizes it, and then adds it to the excel spreadsheet
+        print(len(images_list[1]))
+        print(len(total_count_array))
         countSheet = pd.ExcelWriter(full_path, mode="a", engine='openpyxl', if_sheet_exists='replace')
         df = pd.DataFrame({"Image": images_list[1], "Total Count": total_count_array})
         sf = styleframe.StyleFrame(df)
@@ -781,10 +782,10 @@ class TrainWindow (qtw.QWidget):
         self.layout().addWidget(self.title_label)
 
         # Creates a file dialog button
-        self.xml_button = qtw.QPushButton("Select Image Configs (.xml)")
-        self.xml_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-        self.xml_button.clicked.connect(self.xml_button_clicked)
-        self.layout().addWidget(self.xml_button)
+        self.yaml_button = qtw.QPushButton("Select Training Config (*.yaml)")
+        self.yaml_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.yaml_button.clicked.connect(self.yaml_button_clicked)
+        self.layout().addWidget(self.yaml_button)
 
         # Creates a back button
         self.back_button = qtw.QPushButton("Cancel")
@@ -795,109 +796,49 @@ class TrainWindow (qtw.QWidget):
         # Shows window
         self.show()
         
-    def xml_button_clicked(self):
+    def yaml_button_clicked(self):
         # Opens file explorer to choose images
-        self.xml_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Image Config Folder", cfg.initial_directory)
-        
-        # Pulls current model directory from modeldict.json
-        with open(dirs.dict, "r") as f:
-            model_dict = json.load(f)
-            current_model_name = model_dict[model_dict["current_model_directory"]]
-        
-        # Will check if an image directory was chosen and if they have the MCount model selected. If so, the labelmap dialog will be bypassed. 
-        if self.xml_dir and current_model_name == "MCount Mussel Detector":
-            # Bypasses the labelmap file dialog
-            self.labelmap_bypass = True
-
-            self.labelmap = cwd + "/internal/model/annotations/labelmap.pbtxt"
-            
-            self.xml_button.setParent(None)
-            self.labelmap_button = qtw.QPushButton("Placeholder")
-
-            # Continues as if labelmap button was pressed
-            self.labelmap_button_clicked()
+        self.yaml, done = qtw.QFileDialog.getOpenFileName(self, "Open Training Config File", cfg.initial_directory, "YAML file (*.yaml)")
 
         # Checks if images were chosen
-        elif self.xml_dir:
-            self.xml_button.setParent(None)
-            self.back_button.setParent(None)
-            self.labelmap_button = qtw.QPushButton("Select Labelmap (.pbtxt)")
-            self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
-            self.layout().addWidget(self.labelmap_button)
-            self.layout().addWidget(self.back_button)
-
-    def labelmap_button_clicked(self):
-        if self.labelmap_bypass == False:
-            # Opens a file dialog to select the model's labelmap
-            self.labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-
-        # If the labelmap bypass is true, the app will skip the labelmap selection
-        if self.labelmap or self.labelmap_bypass == True:        
-            self.labelmap_button.setParent(None)
+        if self.yaml != "" and done:
+            self.yaml_button.setParent(None)
             self.back_button.setParent(None)
             self.train_button = qtw.QPushButton("Begin Model Training")
             self.train_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
             self.train_button.clicked.connect(self.train_button_clicked)
             self.layout().addWidget(self.train_button)
             self.layout().addWidget(self.back_button)
-        
-    def config_parse(self):
-        # Sets important config keys
-        key1 = "input_path:"
-        key2 = "label_map_path:"
-        key3 = "fine_tune_checkpoint:"
-
-        # Reads the  config file and processes lines
-        with open(self.model_dir + "/pipeline.config", "r") as file:
-            lines = file.readlines()
-
-        # Changes lines that contain the right keys to give correct paths 
-        for i, line in enumerate(lines):
-            if key1 in line:
-                lines[i] = textwrap.indent(f'{key1} "{self.tfrecord_dir}" \n', "    ")
-            
-            elif key2 in line:
-                lines[i] = textwrap.indent(f'{key2} "{self.labelmap}" \n', "  ")
-
-            elif key3 in line:
-                lines[i] = textwrap.indent(f'{key3} "{self.ckpt_path}" \n', "  ")
-            
-        # Writes the modified lines back to the file
-        with open(self.model_dir + "/pipeline.config", "w") as file:
-            file.writelines(lines)
 
     def train_button_clicked(self):
-        self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this training:')
-        if self.name != "" and done:
-            # Closes the window
-            self.close()
+        self.epochs, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Amount of epochs for this training:')
+        if self.epochs != "" and done:
+            print(self.epochs)
+            self.pxsize, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Pixel size of the images used for this training (e.g. 640):')
             
-            # Defines paths to model folders/files
-            with open(dirs.dict, "r") as f:
-                model_dict = json.load(f)
-            self.tfrecord_dir = dirs.training + f"/{self.name}.record"
-            self.csv_path = dirs.training + f"/{self.name}.csv"
-            self.script_name = dirs.scripts + "/tfrecord_generation.py"
-            self.model_dir = model_dict["current_model_directory"]
-            self.ckpt_path = self.model_dir + "/reference_model/checkpoint/ckpt-0"
-            self.pipeline_dir = self.model_dir + "/pipeline.config"
-            
-            # Sets up training directory
-            dirs.new_training_directory(train_name = self.name)
+            if self.pxsize != "" and done:
+                print(self.pxsize)
+                self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name for this training:')
 
-            self.config_parse()
-            
-            # Opens CMD and runs tfrecord generation, then begins training (I don't know a good way to separate these processes)
-            subprocess.check_call(["start", "cmd", "/k", "python", self.script_name, "-x", self.xml_dir, "-l", self.labelmap, "-o", self.tfrecord_dir, "-i", self.xml_dir, "-c", self.csv_path], shell=True)
-            subprocess.check_call(["start", "cmd", "/k", "python", f"{cwd}/internal/scripts/model_main_tf2.py", f"--model_dir={self.model_dir}", f"--pipeline_config_path={self.model_dir}/pipeline.config"], shell=True)
+                if self.name != "" and done:
+                    print(self.name)
+
+                    # Closes the window
+                    self.close()
+                    
+                    dirs.new_training_directory()
+
+                    with open(dirs.dict, "r") as f:
+                        model_dict = json.load(f)
+                        current_model = model_dict["current_model_directory"]
+
+                    yt.new_train(model_path=current_model, yaml=self.yaml, loops=self.epochs, img_size=self.pxsize, name=self.name)
     
     def back_button_clicked(self):
         self.mw = MainWindow()
         self.mw.move(self.pos())
         self.mw.show()
         self.close()
-
 
 class SelectWindow (qtw.QWidget): 
     def __init__(self):
@@ -941,21 +882,24 @@ class SelectWindow (qtw.QWidget):
         with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
             values = list(model_dict.values())
-        directory = model_dict["current_model_directory"]
-        model_name = model_dict[directory]
-        self.model_dropdown.addItem(model_name)
-        for item in values[1:]:
-            if item != model_name:
+            values.pop(0)
+    
+        for item in values:
+            path = list(model_dict.keys())[list(model_dict.values()).index(item)]
+            if path == model_dict["current_model_directory"]:
                 self.model_dropdown.addItem(item)
+                values.remove(item)
+
+        self.model_dropdown.addItems(values)
         
         # Creates a file dialog button
-        file_button = qtw.QPushButton("Add Model Folder")
+        file_button = qtw.QPushButton("Add Model File")
         file_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
         file_button.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Fixed)
         file_button.clicked.connect(self.file_button_clicked)
         self.layout().addWidget(file_button)
         
-        # Creates help/quit button split at bottom of window
+        # Creates button split at bottom of window
         self.menu_split = qtw.QHBoxLayout()
         self.menu_split.setSpacing(10)
         self.layout().addLayout(self.menu_split)
@@ -981,7 +925,7 @@ class SelectWindow (qtw.QWidget):
     
     def file_button_clicked(self):
         # Opens file explorer to choose a directory
-        self.folderpath = qtw.QFileDialog.getExistingDirectory(self, 'Select Model Folder', cfg.initial_directory)
+        self.folderpath, _ = qtw.QFileDialog.getOpenFileName(self, 'Select Model File', cfg.initial_directory, "PyTorch Model File (*.pt)")
         with open(dirs.dict, "r") as f:
             model_dict = json.load(f)
         # Checks if a folder was returned and if the folder is already in modeldict.json
