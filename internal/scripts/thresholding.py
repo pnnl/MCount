@@ -55,8 +55,6 @@ def threshFunction (image_dir_counting, countName, images,
         lower_red = np.array([180,180,190])
         upper_red = np.array([170,155,110])
         
-
-        
         # Get image in red pixel only
         red_img = cv2.bitwise_and(img.copy(), img.copy(), mask = mask)
         
@@ -68,7 +66,7 @@ def threshFunction (image_dir_counting, countName, images,
 
         _, thresh = cv2.threshold(blurred,1,255,cv2.THRESH_BINARY_INV)
         
-        theImgTestAltThresh = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,3, 8)
+        alt_thresh = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,3, 8)
         
         
         kernel = np.ones((15,15),np.uint8)
@@ -91,7 +89,7 @@ def threshFunction (image_dir_counting, countName, images,
         path = "detections/"+  countName + "/images/thresholding"
 
         full_path = path + "/"+ endname
-        print ("file paths of directories made:", full_path)
+        print ("Paths of directories made:", full_path)
         # try:
         os.mkdir(full_path)
         # except:
@@ -109,13 +107,11 @@ def threshFunction (image_dir_counting, countName, images,
             cv2.imwrite((full_path + "/6_closing.jpg"), closing)
         cv2.imwrite((full_path + "/7_my_final_use.jpg"), final)
         if (image8_buttontest):
-            cv2.imwrite((full_path+"/extra_the_img_test_alt_thresh.jpg"), theImgTestAltThresh)
+            cv2.imwrite((full_path+"/extra_the_img_test_alt_thresh.jpg"), alt_thresh)
         if (image9_buttontest):
             cv2.imwrite((full_path + "/notUsed_closing2.jpg"), closing2)
             cv2.imwrite((full_path + "/notUsed_regular.jpg"), regular)
             cv2.imwrite((full_path + "/notUsed7_negative.jpg"), negative)
-
-        
         
         trans = Image.open(full_path + "/7_my_final_use.jpg")
         trans.putalpha(75)
@@ -132,7 +128,7 @@ def threshFunction (image_dir_counting, countName, images,
         
         number_of_black_pixels = np.sum(final == 0)
         
-        print ("black pixels: ", number_of_black_pixels)
+        print ("Black pixels: ", number_of_black_pixels)
         
         mussel = round(number_of_black_pixels/pixels_per_mussel)
         
@@ -142,8 +138,8 @@ def threshFunction (image_dir_counting, countName, images,
         mussel_counts.append(mussel)
         black_pixels.append(number_of_black_pixels)
 
-    locationForThis = "detections/"+  countName + "/spreadsheets"
-    countSheet = pd.ExcelWriter(locationForThis + "/" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
+    excel_dir = "detections/"+  countName + "/spreadsheets"
+    countSheet = pd.ExcelWriter(excel_dir + "/" + 'overall_counts.xlsx', mode="a", engine='openpyxl')
     df = pd.DataFrame({'Image': filenames, 'Clump Mussel Count': mussel_counts, 'Black Pixels': black_pixels})
     sf = styleframe.StyleFrame(df)
     sf.to_excel(excel_writer=countSheet, best_fit=["Image", "Clump Mussel Count", "Black Pixels"], sheet_name="Thresholding", columns_and_rows_to_freeze='B2', row_to_add_filters=0)

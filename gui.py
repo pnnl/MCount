@@ -1,7 +1,11 @@
 from colorama import *
 from termcolor import * 
 from pyfiglet import *
+from multiprocessing import freeze_support
 import time
+
+# Prevents a windows OS bug
+freeze_support()
 
 cprint(figlet_format("MCount", font="standard"), attrs=["bold"])
 
@@ -38,6 +42,7 @@ cwd = (os.getcwd()).replace("\\", "/")
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
+
 
 # Opens the model dict
 with open(dirs.dict, "r") as f:
@@ -296,14 +301,13 @@ class CountWindow(qtw.QWidget):
             self.layout().addWidget(self.img_selection_checkbox)
             self.layout().addWidget(self.next_button)
             self.layout().addWidget(self.back_button)
-            print(CountWindow.run_thresh)
+            
 
         # If the thresholding checkbox is unchecked, the selection checkbox is removed
         if not self.thresh_checkbox.isChecked():
             CountWindow.run_thresh = False
             self.img_selection_checkbox.setChecked(False)
             self.img_selection_checkbox.setParent(None)
-            print(CountWindow.run_thresh)
 
     # This function is run anytime the selection checkbox is checked or unchecked
     def select_checkbox_changed(self):
@@ -682,13 +686,6 @@ class DetectionThread(qtc.QThread):
         return [images, names]
     
     def run(self):
-
-        print(CountWindow.run_thresh)
-        print(CountWindow.run_thresh)
-        print(CountWindow.run_thresh)
-        # Sets the initial percentage for the progress bar
-        total_percent = 0 
-
         # Returns the paths and names of the images selected
         images_list = self.list_image(image_dir)
 
@@ -714,7 +711,6 @@ class DetectionThread(qtc.QThread):
 
         # Checks if the user selected mussel thresholding or not
         if CountWindow.run_thresh:
-            print("DETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\nDETECTED TRUE!\n")
             try:
                 thresh_count_and_names = thresholding.threshFunction(image_dir, name_of_count, images_list[0],
                                             CountWindow.image1_buttontest.checkState(),
@@ -762,8 +758,6 @@ class DetectionThread(qtc.QThread):
         workbook.save(full_path)
 
         # Creates a pandas dataframe with the totals, stylizes it, and then adds it to the excel spreadsheet
-        print(len(images_list[1]))
-        print(len(total_count_array))
         countSheet = pd.ExcelWriter(full_path, mode="a", engine='openpyxl', if_sheet_exists='replace')
         df = pd.DataFrame({"Image": images_list[1], "Total Count": total_count_array})
         sf = styleframe.StyleFrame(df)
@@ -819,16 +813,12 @@ class TrainWindow (qtw.QWidget):
     def train_button_clicked(self):
         self.epochs, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Amount of epochs for this training:')
         if self.epochs != "" and done:
-            print(self.epochs)
             self.pxsize, done = qtw.QInputDialog.getInt(self, 'Input Dialog', 'Pixel size of the images used for this training (e.g. 640):')
             
             if self.pxsize != "" and done:
-                print(self.pxsize)
                 self.name, done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name for this training:')
 
                 if self.name != "" and done:
-                    print(self.name)
-
                     # Closes the window
                     self.close()
                     
