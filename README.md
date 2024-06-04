@@ -4,7 +4,7 @@
 MCount is a GUI App built with PyQt6 that streamlines object detection. It utilizes a built-in computer vision model and thresholding system to accurately gather mussel larvae settlement data. It can also run or train any YOLOv8 object detection model! 
 
 ## Installation
-To install MCount, simply download and extract the latest distribution. No additional packages need to be installed. 
+To install MCount, simply download and extract the latest <p><a href="">distribution</a></p>. No additional packages need to be installed. 
 
 ## How to Use MCount
 You can minimize MCount anytime by clicking the - near the top right corner.
@@ -67,8 +67,29 @@ If you've changed folder location of an added model, it will not work. To remove
 
 *Currently, only Yolov8 models are compatible with MCount. 
 
-
-
+## DISCLAIMER
+This material was prepared as an account of work sponsored by an agency of the
+United States Government.  Neither the United States Government nor the United
+States Department of Energy, nor Battelle, nor any of their employees, nor any
+jurisdiction or organization that has cooperated in the development of these
+materials, makes any warranty, express or implied, or assumes any legal
+liability or responsibility for the accuracy, completeness, or usefulness or
+any information, apparatus, product, software, or process disclosed, or
+represents that its use would not infringe privately owned rights.
+ 
+Reference herein to any specific commercial product, process, or service by
+trade name, trademark, manufacturer, or otherwise does not necessarily
+constitute or imply its endorsement, recommendation, or favoring by the United
+States Government or any agency thereof, or Battelle Memorial Institute. The
+views and opinions of authors expressed herein do not necessarily state or
+reflect those of the United States Government or any agency thereof.
+ 
+                 PACIFIC NORTHWEST NATIONAL LABORATORY
+                              operated by
+                                BATTELLE
+                                for the
+                   UNITED STATES DEPARTMENT OF ENERGY
+                    under Contract DE-AC05-76RL01830
 
 
 
