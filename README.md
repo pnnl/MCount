@@ -4,7 +4,7 @@
 MCount is a GUI App built with PyQt6 that streamlines object detection. It utilizes a built-in computer vision model and thresholding system to accurately gather mussel larvae settlement data. It can also run or train any YOLOv8 object detection model! 
 
 ## Installation
-To install MCount, simply download and extract the latest <p><a href="">distribution</a></p>. No additional packages need to be installed. 
+To install MCount, simply download and extract the latest <a href="">distribution</a>. No additional packages need to be installed. 
 
 ## How to Use MCount
 You can minimize MCount anytime by clicking the - near the top right corner.
@@ -83,9 +83,8 @@ constitute or imply its endorsement, recommendation, or favoring by the United
 States Government or any agency thereof, or Battelle Memorial Institute. The
 views and opinions of authors expressed herein do not necessarily state or
 reflect those of the United States Government or any agency thereof.
- 
-PACIFIC NORTHWEST NATIONAL LABORATORY operated by BATTELLE for tge UNITED STATES DEPARTMENT OF ENERGY under Contract DE-AC05-76RL01830
-
-
+```
+PACIFIC NORTHWEST NATIONAL LABORATORY operated by BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY under Contract DE-AC05-76RL01830
+```
 
 
