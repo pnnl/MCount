@@ -227,71 +227,33 @@ class CountWindow(qtw.QWidget):
         global image_dir
         # Opens file explorer to choose images
         image_dir = qtw.QFileDialog.getExistingDirectory(self, "Open Images Folder", cfg.initial_directory)
-
-        # Pulls current model directory from modeldict.json
-        with open(dirs.dict, "r") as f:
-            model_dict = json.load(f)
-            current_model_name = model_dict[model_dict["current_model_directory"]]
         
-        # Will check if an image directory was chosen and if they have the MCount model selected
-        if image_dir and current_model_name == "MCount Mussel Detector":
-            # Bypasses the labelmap file dialog
-            self.labelmap_bypass = True
-            
-            self.default_labelmap = cwd + "/internal/model/annotations/labelmap.pbtxt"
+        if image_dir:
+            # Continues to next window
+            self.images_selected()
 
-            global labelmap
-            labelmap = self.default_labelmap
-            
-            # Does formatting stuff
-            self.file_button.setParent(None)
-            self.labelmap_button = qtw.QPushButton("Placeholder")
+    def images_selected(self):
+        # Does formatting stuff
+        self.file_button.setParent(None)
+        self.back_button.setParent(None)
 
-            # Continues as if labelmap button was pressed
-            self.labelmap_button_clicked()
+        # Creates checkboxes for thresholding and spreadsheet
+        self.thresh_checkbox = qtw.QCheckBox("Run Thresholding")
+        # self.thresh_checkbox.setChecked(True)
+        self.thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
+        self.layout().addWidget(self.thresh_checkbox)
+        self.img_selection_checkbox = qtw.QCheckBox("Download Specific Thresholding Images")
+        self.img_selection_checkbox.stateChanged.connect(self.select_checkbox_changed)
+        # self.layout().addWidget(self.img_selection_checkbox)
 
-        # Checks if images were chosen
-        elif image_dir:
-            # Removes file button and back button
-            self.file_button.setParent(None)
-            self.back_button.setParent(None)
-
-            # Creates a labelmap file dialog button
-            self.labelmap_button = qtw.QPushButton("Select Labelmap (.pbtxt)")
-            self.labelmap_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.labelmap_button.clicked.connect(self.labelmap_button_clicked)
-            self.layout().addWidget(self.labelmap_button)
-
-            # Adds the back button
-            self.layout().addWidget(self.back_button)
-    
-    def labelmap_button_clicked(self):
-        # Checks for labelmap_bypass
-        global labelmap
-        if self.labelmap_bypass == False:
-            labelmap, _ = qtw.QFileDialog.getOpenFileName(self, "Open Label Map File", cfg.initial_directory, "Protocol Buffer Text File (*.pbtxt)")
-        if labelmap or self.labelmap_bypass == True:
-            # Does formatting stuff
-            self.labelmap_button.setParent(None)
-            self.back_button.setParent(None)
-
-            # Creates checkboxes for thresholding and spreadsheet
-            self.thresh_checkbox = qtw.QCheckBox("Run Thresholding")
-            # self.thresh_checkbox.setChecked(True)
-            self.thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
-            self.layout().addWidget(self.thresh_checkbox)
-            self.img_selection_checkbox = qtw.QCheckBox("Download Specific Thresholding Images")
-            self.img_selection_checkbox.stateChanged.connect(self.select_checkbox_changed)
-            # self.layout().addWidget(self.img_selection_checkbox)
-
-            # Creates a run button
-            self.next_button = qtw.QPushButton("Run Model")
-            self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.next_button.clicked.connect(self.name_count)
-            self.layout().addWidget(self.next_button)
-            
-            # Adds the back button
-            self.layout().addWidget(self.back_button)
+        # Creates a run button
+        self.next_button = qtw.QPushButton("Run Model")
+        self.next_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.next_button.clicked.connect(self.name_count)
+        self.layout().addWidget(self.next_button)
+        
+        # Adds the back button
+        self.layout().addWidget(self.back_button)
 
     # This function is run anytime the thresholding checkbox is checked or unchecked
     def thresh_checkbox_changed(self):
