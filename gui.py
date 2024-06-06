@@ -7,6 +7,8 @@ import time
 # Prevents a windows OS bug
 freeze_support()
 
+print("")
+
 cprint(figlet_format("MCount", font="standard"), attrs=["bold"])
 
 time.sleep(1)
@@ -239,12 +241,10 @@ class CountWindow(qtw.QWidget):
 
         # Creates checkboxes for thresholding and spreadsheet
         self.thresh_checkbox = qtw.QCheckBox("Run Thresholding")
-        # self.thresh_checkbox.setChecked(True)
         self.thresh_checkbox.stateChanged.connect(self.thresh_checkbox_changed)
         self.layout().addWidget(self.thresh_checkbox)
         self.img_selection_checkbox = qtw.QCheckBox("Download Specific Thresholding Images")
         self.img_selection_checkbox.stateChanged.connect(self.select_checkbox_changed)
-        # self.layout().addWidget(self.img_selection_checkbox)
 
         # Creates a run button
         self.next_button = qtw.QPushButton("Run Model")
@@ -314,7 +314,8 @@ class CountWindow(qtw.QWidget):
             self.next_button.setParent(None)
 
             self.run_button_clicked()
-        if name and self.done:
+
+        elif name and self.done:
             # Sets the name
             name_of_count = name
             
@@ -327,77 +328,107 @@ class CountWindow(qtw.QWidget):
         
         
     def select_thresh_images(self):
-            # Clears previous app elements
+        # Clears previous app elements
+        self.thresh_checkbox.setParent(None)
+        self.img_selection_checkbox.setParent(None)
+        self.next_button.setParent(None)
+
+        # Changes title
+        self.title_label.setText("Select Images\nTo Save")
+
+        # Creates help/quit button split at bottom
+        self.menu_split1 = qtw.QHBoxLayout()
+        self.menu_split1.setSpacing(10)
+        self.layout().addLayout(self.menu_split1)
+        self.menu_split2 = qtw.QVBoxLayout()
+        self.menu_split2.setSpacing(10)
+        self.menu_split1.addLayout(self.menu_split2)
+        self.menu_split3 = qtw.QVBoxLayout()
+        self.menu_split3.setSpacing(10)
+        self.menu_split1.addLayout(self.menu_split3)
+        self.menu_split4 = qtw.QVBoxLayout()
+        self.menu_split4.setSpacing(10)
+        self.menu_split1.addLayout(self.menu_split4)
+        
+        # Creates checkboxes for saving images
+        self.image1_buttontest = qtw.QCheckBox("#1 Original")
+        self.image1_buttontest.setChecked(True)
+        self.menu_split2.addWidget(self.image1_buttontest)
+
+        self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
+        self.image2_buttontest.setChecked(False)
+        self.menu_split2.addWidget(self.image2_buttontest)
+
+        self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
+        self.image3_buttontest.setChecked(False)
+        self.menu_split2.addWidget(self.image3_buttontest)
+
+        self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
+        self.image4_buttontest.setChecked(False)
+        self.menu_split3.addWidget(self.image4_buttontest)
+
+        self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
+        self.image5_buttontest.setChecked(True)
+        self.menu_split3.addWidget(self.image5_buttontest)
+
+        self.image6_buttontest = qtw.QCheckBox("#6 Closing")
+        self.image6_buttontest.setChecked(False)
+        self.menu_split3.addWidget(self.image6_buttontest)
+
+        self.image7_buttontest = qtw.QCheckBox("#7 Final")
+        self.image7_buttontest.setChecked(True)
+        self.menu_split4.addWidget(self.image7_buttontest)
+
+        self.image8_buttontest = qtw.QCheckBox("#8 Extra")
+        self.image8_buttontest.setChecked(False)
+        self.menu_split4.addWidget(self.image8_buttontest)
+
+        self.image9_buttontest = qtw.QCheckBox("#9 Unused")
+        self.image9_buttontest.setChecked(False)
+        self.menu_split4.addWidget(self.image9_buttontest)
+
+        # Creates a run button
+        self.run_button = qtw.QPushButton("Run Model")
+        self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
+        self.run_button.clicked.connect(self.get_rid_of_checkboxes)
+        self.layout().addWidget(self.run_button)
+
+        # Fixes location of start button
+        self.layout().addWidget(self.back_button)
+
+    def get_rid_of_checkboxes(self):
+        # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
+        name, self.done = qtw.QInputDialog.getText(self, 'Input Dialog', 'Name this counting:')
+        global name_of_count
+        if name == "" and self.done:
+            try:
+                # Finds the highest number in the unnamed folders and adds 1
+                unnamed_files = []
+                pattern = re.compile(r"\d+")
+                for sub_dir in next(os.walk(dirs.detections))[1]:
+                    if "Unnamed Detection" in sub_dir:
+                        match = pattern.findall(str(sub_dir))
+                        if match:
+                            unnamed_files.append(int(match[0]))
+                if unnamed_files != []: 
+                    value = max(unnamed_files) + 1
+                else:
+                    value = 1
+                name_of_count = f"Unnamed Detection {value}"
+                
+            except:
+                name_of_count = f"Unnamed Detection 1"
+            # Removes widgets from the layout
             self.thresh_checkbox.setParent(None)
             self.img_selection_checkbox.setParent(None)
             self.next_button.setParent(None)
 
-            # Changes title
-            self.title_label.setText("Select Images\nTo Save")
+            self.run_button_clicked()
 
-            # Creates help/quit button split at bottom
-            self.menu_split1 = qtw.QHBoxLayout()
-            self.menu_split1.setSpacing(10)
-            self.layout().addLayout(self.menu_split1)
-            self.menu_split2 = qtw.QVBoxLayout()
-            self.menu_split2.setSpacing(10)
-            self.menu_split1.addLayout(self.menu_split2)
-            self.menu_split3 = qtw.QVBoxLayout()
-            self.menu_split3.setSpacing(10)
-            self.menu_split1.addLayout(self.menu_split3)
-            self.menu_split4 = qtw.QVBoxLayout()
-            self.menu_split4.setSpacing(10)
-            self.menu_split1.addLayout(self.menu_split4)
-            
-            # Creates checkboxes for saving images
-            self.image1_buttontest = qtw.QCheckBox("#1 Original")
-            self.image1_buttontest.setChecked(True)
-            self.menu_split2.addWidget(self.image1_buttontest)
+        elif name and self.done:
+            # Sets the name
+            name_of_count = name
 
-            self.image2_buttontest = qtw.QCheckBox("#2 Red Segmentation")
-            self.image2_buttontest.setChecked(False)
-            self.menu_split2.addWidget(self.image2_buttontest)
-
-            self.image3_buttontest = qtw.QCheckBox("#3 Grayscale")
-            self.image3_buttontest.setChecked(False)
-            self.menu_split2.addWidget(self.image3_buttontest)
-
-            self.image4_buttontest = qtw.QCheckBox("#4 Blurred")
-            self.image4_buttontest.setChecked(False)
-            self.menu_split3.addWidget(self.image4_buttontest)
-
-            self.image5_buttontest = qtw.QCheckBox("#5 Thresholding")
-            self.image5_buttontest.setChecked(True)
-            self.menu_split3.addWidget(self.image5_buttontest)
-
-            self.image6_buttontest = qtw.QCheckBox("#6 Closing")
-            self.image6_buttontest.setChecked(False)
-            self.menu_split3.addWidget(self.image6_buttontest)
-
-            self.image7_buttontest = qtw.QCheckBox("#7 Final")
-            self.image7_buttontest.setChecked(True)
-            self.menu_split4.addWidget(self.image7_buttontest)
-
-            self.image8_buttontest = qtw.QCheckBox("#8 Extra")
-            self.image8_buttontest.setChecked(False)
-            self.menu_split4.addWidget(self.image8_buttontest)
-
-            self.image9_buttontest = qtw.QCheckBox("#9 Unused")
-            self.image9_buttontest.setChecked(False)
-            self.menu_split4.addWidget(self.image9_buttontest)
-
-            # Creates a run button
-            self.run_button = qtw.QPushButton("Run Model")
-            self.run_button.setFont(qtg.QFont(cfg.default_font, cfg.button_font_size))
-            self.run_button.clicked.connect(self.get_rid_of_checkboxes)
-            self.layout().addWidget(self.run_button)
-
-            # Fixes location of start button
-            self.layout().addWidget(self.back_button)
-
-    def get_rid_of_checkboxes(self):
-        self.name_count()
-        if self.done:
             # Removes a million widgets LOL
             self.menu_split1.setParent(None)
             self.menu_split2.setParent(None)
@@ -415,8 +446,7 @@ class CountWindow(qtw.QWidget):
             self.image9_buttontest.setParent(None)
 
             self.run_button.setParent(None)
-            
-            # Begins the detections
+
             self.run_button_clicked()
 
     def run_button_clicked(self):
@@ -441,14 +471,14 @@ class CountWindow(qtw.QWidget):
         self.progress_bar.setMaximum(100)
         self.layout().addWidget(self.progress_bar)
 
+        # Sets the beginning percent for the progress bar
+        self.current_percent = 0
+
         # Runs the detections
         self.detection = DetectionThread()
         self.detection.start()
         self.detection.any_signal.connect(self.loading)
         self.detection.finished.connect(self.count_complete)
-        
-        # Sets the beginning percent for the progress bar
-        self.current_percent = 0
 
     # This function is run any time a signal is emitted from the detection thread
     def loading (self, percent, process):
