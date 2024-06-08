@@ -45,7 +45,6 @@ os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
 
-
 # Opens the model dict
 with open(dirs.dict, "r") as f:
     model_dict = json.load(f)
@@ -284,7 +283,6 @@ class CountWindow(qtw.QWidget):
             self.next_button.setText("Run Model")
             self.next_button.clicked.disconnect(self.select_thresh_images)
             self.next_button.clicked.connect(self.name_count)
-
 
     def name_count (self):
         # Opens an input dialog for the user to name the count (Files will be stored in a subdirectory under this name)
@@ -646,7 +644,6 @@ class CountWindow(qtw.QWidget):
         self.mw.show()
         self.close()
 
-
 # Any instance of this class is run on a separate thread from the rest of the code, which means it runs concurrently with the GUI
 class DetectionThread(qtc.QThread):
     # Defines which signals are transmitted to the loading function
@@ -755,7 +752,6 @@ class DetectionThread(qtc.QThread):
         sf = styleframe.StyleFrame(df)
         sf.to_excel(excel_writer=countSheet, sheet_name="Totals", best_fit=["Image", "Total Count"], columns_and_rows_to_freeze='B2', row_to_add_filters=0)
         countSheet.close()
-
 
 class TrainWindow (qtw.QWidget):
     def __init__(self):
