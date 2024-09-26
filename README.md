@@ -41,7 +41,7 @@ Once you're done with viewing your detection images or spreadsheets, click "Main
 ### Train Model
 After clicking the Train button, the main menu will disappear and the Train window will open.
 
-You may select your training's config file by clicking the "Select Training Config" button. You will need to select a YAML file with the object classes and training directory that will be used in this training. 
+You may select your training's config file by clicking the "Select Training Config" button. You will need to select a YAML file containing the correct object classes and training directories, as described in the additional training setup section.
 
 After selecting the config file, you will need to set some of the parameters for your training. MCount will prompt you to input the number of epochs (loops of training through your image set), the image size of your dataset, and the name for this training. 
 
@@ -49,6 +49,46 @@ Once you've provided the parameters for your training, MCount will close and the
 
 After the training is completed, you may view the training results in the ~/MCount/training/[name of training] directory. It will contain the training evaluation metrics and the resulting model weights file. 
 
+## Additional Training Setup
+In order to run training on a new model, you need to set up a directory with annotated images and an object classes YAML file. 
+
+The training images must be stored in a directory named "images", and must share a parent directory with another directory called "labels". 
+
+All image annotations must be saved in the proper YOLO text file format (.txt), and have file names which match the image they are annotating. The recommended image annotation tool for MCount is LabelImg.
+
+Example directory tree:
+
+```
+parent_directory
+├── images
+    ├── image_1.jpg
+    ├── image_2.jpg
+    ├── image_3.jpg
+    ├── ...
+├── labels
+    ├── image_1.txt
+    ├── image_2.txt
+    ├── image_3.txt
+    ├── ...
+```
+
+The object classes YAML file is needed to tell the YOLO model what labels it is training on and where the training, validation, and test images are stored.
+
+The object classes YAML file (or the training config file) should be formatted as the following: 
+
+```
+# Names of labels used in annotations
+names:
+   0: Object_name_1
+   1: Object_name_2
+   2: Object_name_3
+   ...
+
+# Image directory paths (only training directory path is absolutely neccessary)
+train: "training_directory_path"
+val: "validation_directory_path"
+test: "testing_directory_path"
+```
 
 ### Select Model
 After clicking the Select Model button, the main menu will disappear and the Select Model window will open. 
