@@ -104,7 +104,7 @@ names:
    2: Object_name_3
    ...
 
-# Image directory paths (only training and validation path is required for )
+# Image directory paths (only training and validation path is required)
 train: "training_directory_path"
 val: "validation_directory_path"
 test: "testing_directory_path"
